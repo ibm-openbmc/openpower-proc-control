@@ -127,4 +127,5 @@ AC_CONFIG_FILES([op-stop-instructions@.service])
 AC_CONFIG_FILES([op-cfam-reset.service])
 AC_CONFIG_FILES([op-continue-mpreboot@.service])
 AC_CONFIG_FILES([op-enter-mpreboot@.service])
+AC_CONFIG_HEADERS([config.h])
 AC_OUTPUT
