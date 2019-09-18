@@ -116,11 +116,19 @@ AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
 AC_CONFIG_FILES([Makefile
         test/Makefile])
 
+#MACHINE can be passed in a from a recipe, or it will default to rainier
+AC_ARG_VAR(MACHINE, [To build openpower-boot-control based out system type])
+AS_IF([test "x$MACHINE" == "x"], [MACHINE="rainier"])
+AS_IF([test "$MACHINE" == "rainier"],
+      [
+        AC_CONFIG_FILES([boot-control/Makefile])
+      ])
+AM_CONDITIONAL([BOOT_BUILD], [test "$MACHINE" == "rainier"])
+
 AC_CONFIG_FILES([pcie-poweroff@.service])
 AC_CONFIG_FILES([xyz.openbmc_project.Control.Host.NMI.service])
 AC_CONFIG_FILES([op-stop-instructions@.service])
 AC_CONFIG_FILES([op-cfam-reset.service])
 AC_CONFIG_FILES([op-continue-mpreboot@.service])
 AC_CONFIG_FILES([op-enter-mpreboot@.service])
-AC_CONFIG_HEADERS([config.h])
 AC_OUTPUT
