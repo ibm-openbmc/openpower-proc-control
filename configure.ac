@@ -38,35 +38,6 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
     AC_SUBST([OESDK_TESTCASE_FLAGS], [$testcase_flags])
 )
 
-#MACHINE can be passed in a from a recipe, or it will default to rainier
-AC_ARG_VAR(MACHINE, [To build openpower-boot-control based out system type])
-AS_IF([test "x$MACHINE" == "x"], [MACHINE="rainier"])
-
-AS_IF([test "$MACHINE" == "rainier"],
-      [
-        AX_ABSOLUTE_HEADER([libpdbg.h])
-        if test x"$gl_cv_absolute_libpdbg_h" == "x" ; then
-                AC_MSG_ERROR([Cannot find libpdbg.h path])
-        fi
-        INCDIR=$(dirname $gl_cv_absolute_libpdbg_h)
-        AC_SUBST([INCDIR])
-
-        AC_CHECK_LIB([pdbg], [pdbg_targets_init], [LIBS="-lpdbg"], [], [])
-        if test x"$ac_cv_lib_pdbg_pdbg_targets_init" != "xyes" ; then
-                AC_MSG_ERROR([PDBG library not found])
-        fi
-
-        AC_CHECK_LIB([ekb], [p10_start_cbs], [LIBS="-lekb"], [], [])
-        if test x"$ac_cv_lib_ekb_p10_start_cbs" != "xyes" ; then
-                AC_MSG_ERROR([EKB library not found])
-        fi
-
-        AC_CHECK_LIB([atdb], [atdb_blob_open], [LIBS="-latdb"], [], [])
-        if test x"$ac_cv_lib_atdb_atdb_blob_open" != "xyes" ; then
-                AC_MSG_ERROR([ATDB library not found])
-        fi
-     ])
-
 #CHIPS can be passed in a from a recipe, or it will default to P9 and openfsi
 AC_ARG_VAR(CHIPS, [The list of chips to build the procedures for])
 
@@ -114,12 +85,6 @@ AS_IF([test "$enable_phal" == "yes"],
 AM_CONDITIONAL([ENABLE_PHAL], [test "$enable_phal" == "yes"])
 AS_IF([test "x$CHIPS" == "x"], [CHIPS="p9 openfsi common"])
 
-AC_ARG_VAR(ATTRIBUTES_INFO_FILE_PATH, [Attributes information file path])
-AS_IF([test "x$ATTRIBUTES_INFO_FILE_PATH" == "x"],
-      [ATTRIBUTES_INFO_FILE_PATH="/usr/share/pdata/attributes.atdb"])
-AC_DEFINE_UNQUOTED([ATTRIBUTES_INFO_FILE_PATH], ["$ATTRIBUTES_INFO_FILE_PATH"],
-                   [Attributes information file path])
-
 AC_CONFIG_FILES([Makefile.generated],
     [${srcdir}/gen_makefile.sh ${srcdir} "$myChips" > Makefile.generated],
     [myChips="$CHIPS"])
@@ -146,12 +111,6 @@ AS_IF([test "x$with_systemdsystemunitdir" != "xno"],
       [AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])])
 AC_CONFIG_FILES([Makefile
         test/Makefile])
-
-AS_IF([test "$MACHINE" == "rainier"],
-      [
-        AC_CONFIG_FILES([boot-control/Makefile])
-      ])
-AM_CONDITIONAL([BOOT_BUILD], [test "$MACHINE" == "rainier"])
 
 AC_CONFIG_FILES([pcie-poweroff@.service])
 AC_CONFIG_FILES([xyz.openbmc_project.Control.Host.NMI.service])
