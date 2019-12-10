@@ -61,8 +61,4 @@ endif
 
 SUBDIRS = test
 
-if BOOT_BUILD
-SUBDIRS += boot-control
-endif
-
 -include Makefile.generated
