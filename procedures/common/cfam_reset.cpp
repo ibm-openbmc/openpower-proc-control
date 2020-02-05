@@ -1,12 +1,10 @@
-#include "xyz/openbmc_project/Common/error.hpp"
-
 #include <unistd.h>
 
 #include <chrono>
 #include <gpiod.hpp>
-#include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <registration.hpp>
+#include <system_error>
 #include <thread>
 
 namespace openpower
@@ -15,7 +13,6 @@ namespace misc
 {
 
 using namespace phosphor::logging;
-using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 
 /**
  * @brief Reset the CFAM using the appropriate GPIO
