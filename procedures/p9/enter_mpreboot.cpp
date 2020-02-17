@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 IBM Corporation
+ * Copyright (C) 2020 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ void enterMpReboot()
     std::vector<std::thread> threads;
     pdbg_targets_init(NULL);
 
-    log<level::INFO>("Starting memory presrving reboot");
+    log<level::INFO>("Starting memory preserving reboot");
     pdbg_for_each_class_target("pib", target)
     {
         if (pdbg_target_probe(target) != PDBG_TARGET_ENABLED)

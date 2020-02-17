@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 IBM Corporation
+ * Copyright (C) 2020 IBM Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ void startHostMpReboot()
     Targeting targets;
     const auto& master = *(targets.begin());
 
-    log<level::INFO>("Running P9 procedure startHost",
+    log<level::INFO>("Running P9 procedure startHostMpReboot",
                      entry("NUM_PROCS=%d", targets.size()));
 
     // Ensure asynchronous clock mode is set
