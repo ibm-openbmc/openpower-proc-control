@@ -11,7 +11,8 @@ systemdsystemunit_DATA = \
 if ENABLE_PHAL
   systemdsystemunit_DATA += set-spi-mux.service \
                             phal-reinit-devtree.service \
-                            proc-pre-poweroff@.service
+                            proc-pre-poweroff@.service \
+                            op-disable-spread-spectrum.service
 endif
 
 bin_PROGRAMS = \
