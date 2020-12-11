@@ -4,12 +4,22 @@ project(
     default_options: [
         'warning_level=3',
         'werror=true',
-        'cpp_std=c++17'
+        'cpp_std=c++17',
+        'buildtype=debugoptimized',
+        'b_ndebug=if-release',
     ],
     license: 'Apache-2.0',
     version: '1.0',
 )
 add_project_arguments('-Wno-psabi', language: 'cpp')
+
+if get_option('cpp_std') != 'c++17'
+    error('This project requires c++17')
+endif
+
+if(get_option('buildtype') == 'minsize')
+    add_project_arguments('-DNDEBUG', language : 'cpp')
+endif
 
 cxx = meson.get_compiler('cpp')
 
@@ -18,8 +28,8 @@ extra_dependencies = []
 extra_unit_files = []
 
 unit_subs = configuration_data()
-unit_subs.set('bindir', get_option('bindir'))
-unit_subs.set('ENABLE_PHAL_TRUE', '')
+unit_subs.set('bindir', join_paths(get_option('prefix'), get_option('bindir')))
+unit_subs.set('ENABLE_PHAL_TRUE', '#')
 
 if get_option('phal').enabled() and get_option('p9').enabled()
     error('phal and p9 cannot be selected at the same time')
@@ -67,7 +77,7 @@ if build_phal
         'set-spi-mux.service',
         'phal-reinit-devtree.service',
     ]
-    unit_subs.set('ENABLE_PHAL_TRUE', '#')
+    unit_subs.set('ENABLE_PHAL_TRUE', '')
 endif
 
 executable(
@@ -91,7 +101,8 @@ executable(
         dependency('phosphor-logging'),
         dependency('sdbusplus'),
         dependency('threads'),
-    ] + extra_dependencies
+    ] + extra_dependencies,
+    install: true
 )
 
 executable(
@@ -105,7 +116,8 @@ executable(
         dependency('phosphor-dbus-interfaces'),
         dependency('phosphor-logging'),
         dependency('sdbusplus'),
-   ]
+   ],
+   install: true
 )
 
 unit_files = [
@@ -131,15 +143,6 @@ foreach u : unit_files
 endforeach
 
 if not get_option('tests').disabled()
-    gtest = dependency('gtest', main: true, disabler: true, required: false)
-    if not gtest.found() and build_tests.enabled()
-        cmake = import('cmake')
-        gtest_subproject = cmake.subproject('gtest')
-        cm_gtest = gtest_subproject.dependency('gtest')
-        cm_gtest_main = gtest_subproject.dependency('gtest_main')
-        gtest = declare_dependency(dependencies: [cm_gtest, cm_gtest_main, threads])
-    endif
-
     test(
         'utest',
         executable(
@@ -148,7 +151,7 @@ if not get_option('tests').disabled()
             'targeting.cpp',
             'filedescriptor.cpp',
             dependencies: [
-                gtest,
+                dependency('gtest', main: true),
                 dependency('phosphor-logging'),
             ],
             implicit_include_directories: false,
