@@ -16,3 +16,18 @@ It will read the sibling's CFAM every 2 seconds. A D-Bus interface will be
 created to make these values available to other applications.
 
 The `rbmc-cfam-daemon` meson option will enable building this code.
+
+## CFAM-S ScratchPad Register Layout
+
+| Field            | Register | Start Bit | Length |
+| ---------------- | -------- | --------- | ------ |
+| API Version      | 1        | 0         | 8      |
+| BMC Position     | 1        | 8         | 1      |
+| Role             | 1        | 9         | 2      |
+| Red Enabled      | 1        | 11        | 1      |
+| Failovers Paused | 1        | 12        | 1      |
+| Provisioned      | 1        | 13        | 1      |
+| BMC State        | 1        | 14        | 3      |
+| Sibling Comms OK | 1        | 17        | 1      |
+| Heartbeat        | 1        | 24        | 8      |
+| FW Version       | 2        | 0         | 32     |
