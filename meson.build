@@ -158,7 +158,7 @@ sdeventplus_dep = dependency('sdeventplus')
 pdi_dep = dependency('phosphor-dbus-interfaces')
 phosphor_logging_dep = dependency('phosphor-logging')
 
-gtest = dependency(
+gtest_dep = dependency(
     'gtest',
     main: true,
     disabler: true,
@@ -166,10 +166,10 @@ gtest = dependency(
     include_type: 'system',
 )
 if get_option('tests').allowed()
-    if not gtest.found()
-        gtest_proj = import('cmake').subproject('gtest', required: false)
+    if not gtest_dep.found()
+        gtest_proj = import('cmake').subproject('googletest', required: false)
         if gtest_proj.found()
-            gtest = declare_dependency(
+            gtest_dep = declare_dependency(
                 dependencies: [
                     dependency('threads'),
                     gtest_proj.dependency('gtest'),
@@ -295,7 +295,7 @@ if not get_option('tests').disabled()
             'test/utest.cpp',
             'targeting.cpp',
             'filedescriptor.cpp',
-            dependencies: [gtest, dependency('phosphor-logging')],
+            dependencies: [gtest_dep, dependency('phosphor-logging')],
             implicit_include_directories: false,
             include_directories: '.',
         ),
