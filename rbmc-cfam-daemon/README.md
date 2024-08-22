@@ -29,5 +29,39 @@ The `rbmc-cfam-daemon` meson option will enable building this code.
 | Provisioned      | 1        | 13        | 1      |
 | BMC State        | 1        | 14        | 3      |
 | Sibling Comms OK | 1        | 17        | 1      |
+| Reserved         | 1        | 18        | 6      |
 | Heartbeat        | 1        | 24        | 8      |
 | FW Version       | 2        | 0         | 32     |
+| Reserved         | 3        | 0         | 32     |
+| Reserved         | 4        | 0         | 32     |
+
+### Field Definitions
+
+**API Version**: The version of the data layout.
+
+**BMC Position**: The position the BMC thinks it is, such as 0 or 1. Each BMC
+should have a unique value or something is wrong.
+
+**Role**: The BMC's role value.
+
+**Red Enabled**: If redundancy is enabled. In general this means file syncing is
+active and failovers are possible unless they are paused. This field is only
+valid when the BMC is active.
+
+**Failovers Paused**: When redundancy is still enabled, i.e. file syncs are
+still occurring, but failovers are not allowed. This could be set for example
+during a boot. This field is only valid when the BMC is active.
+
+**Provisioned**: If this BMC has been provisioned.
+
+**BMC State**: The current state of the BMC. Matches the CurrentBMCState
+property from the BMC state daemon.
+
+**Sibling Comms OK**: If this BMC can read the sibling BMC's CFAM.
+
+**Heartbeat**: This field is incremented by one every time the CFAM application
+receives the Heartbeat signal from the RBMC state manager application. This can
+be used by the sibling to know the management daemon is alive.
+
+**FW Version**: A hash of the VERSION_ID field in /etc/os-release. This is used
+to tell if the BMCs are running the same version of code.
