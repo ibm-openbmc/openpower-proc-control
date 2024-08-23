@@ -13,6 +13,7 @@ sources = [
     'cfam_access.cpp',
     'cfam_fields.cpp',
     'cfam_main.cpp',
+    'local_cfam.cpp',
     'sysfs.cpp',
 ]
 
