@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
+#include "cfam_access.hpp"
 #include "cfam_fields.hpp"
 
 #include <algorithm>
@@ -52,12 +53,20 @@ class BMCCFAM
         {Field::heartbeat, {cfam::ScratchPadReg::one, 24, 8}},
         {Field::fwVersion, {cfam::ScratchPadReg::two, 0, 32}}};
 
-    BMCCFAM() = default;
+    BMCCFAM() = delete;
     virtual ~BMCCFAM() = default;
     BMCCFAM(const BMCCFAM&) = delete;
     BMCCFAM& operator=(const BMCCFAM&) = delete;
     BMCCFAM(BMCCFAM&&) = delete;
     BMCCFAM& operator=(BMCCFAM&&) = delete;
+
+    /**
+     * @brief Constructor
+     *
+     * @param[in] link - The link the CFAM is on
+     * @param[in] sysfs - The sysfs API object
+     */
+    BMCCFAM(size_t link, SysFS& sysfs) : cfamAccess(link, sysfs) {}
 
     /**
      * @brief Of the four possible scratchpad registers, returns the ones
@@ -75,4 +84,10 @@ class BMCCFAM
 
         return regs;
     }
+
+  protected:
+    /**
+     * @brief The object to access the hardware.
+     */
+    CFAMAccess cfamAccess;
 };
