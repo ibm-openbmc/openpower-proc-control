@@ -14,6 +14,7 @@ sources = [
     'cfam_fields.cpp',
     'cfam_main.cpp',
     'local_cfam.cpp',
+    'sibling_cfam.cpp',
     'sysfs.cpp',
 ]
 
