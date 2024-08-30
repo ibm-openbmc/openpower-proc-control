@@ -88,6 +88,15 @@ class BMCCFAM
         return regs;
     }
 
+    /**
+     * @brief Says if the CFAM is ready, i.e. the driver made the
+     *        correct sysfs files.
+     */
+    inline bool isReady() const
+    {
+        return cfamAccess.exists();
+    }
+
   protected:
     /**
      * @brief The object to access the hardware.

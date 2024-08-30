@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
+#include "local_bmc.hpp"
+#include "sysfs.hpp"
+
 #include <sdbusplus/async.hpp>
 
 class Application
@@ -15,9 +18,12 @@ class Application
 
     /**
      * @brief Constructor
+     *
      * @param ctx - The async context object
+     * @param fs - The SysFS object
      */
-    explicit Application(sdbusplus::async::context& ctx) : ctx(ctx)
+    Application(sdbusplus::async::context& ctx, std::unique_ptr<SysFS> fs) :
+        ctx(ctx), sysfs(std::move(fs)), localBMC(ctx, *sysfs.get())
     {
         ctx.spawn(run());
     }
@@ -32,4 +38,14 @@ class Application
      * @brief The async context object
      */
     sdbusplus::async::context& ctx;
+
+    /**
+     * @brief Object to access sysfs scratchpad reg files
+     */
+    std::unique_ptr<SysFS> sysfs;
+
+    /**
+     * @brief Handles logic for the local BMC.
+     */
+    LocalBMC localBMC;
 };
