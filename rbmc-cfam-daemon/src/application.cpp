@@ -5,9 +5,11 @@ sdbusplus::async::task<> Application::run()
 {
     using namespace std::chrono_literals;
 
+    co_await localBMC.start();
+
     while (!ctx.stop_requested())
     {
-        // TODO: Read CFAMs
+        // TODO: Read sibling CFAM
         co_await sdbusplus::async::sleep_for(ctx, 2s);
     }
 

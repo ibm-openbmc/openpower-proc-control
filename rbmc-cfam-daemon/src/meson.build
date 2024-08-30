@@ -9,6 +9,7 @@ sources = [
     'cfam_access.cpp',
     'cfam_fields.cpp',
     'cfam_main.cpp',
+    'local_bmc.cpp',
     'local_cfam.cpp',
     'sibling_cfam.cpp',
     'services.cpp',

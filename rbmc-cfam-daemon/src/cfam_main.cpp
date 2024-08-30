@@ -4,8 +4,9 @@
 int main()
 {
     sdbusplus::async::context ctx;
+    std::unique_ptr<SysFS> sysfs = std::make_unique<SysFSImpl>();
 
-    Application app{ctx};
+    Application app{ctx, std::move(sysfs)};
 
     ctx.run();
 
