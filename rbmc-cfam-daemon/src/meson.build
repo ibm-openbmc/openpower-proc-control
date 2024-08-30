@@ -26,3 +26,13 @@ executable('rbmc-cfamd',
     install: true,
     install_dir: installdir,
 )
+
+executable('cfamstool',
+    'cfam_access.cpp',
+    'cfam_fields.cpp',
+    'cfams_tool.cpp',
+    'local_cfam.cpp',
+    'sysfs.cpp',
+    dependencies: [cfam_deps, cli11_dep],
+    install: true
+)

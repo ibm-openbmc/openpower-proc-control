@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 namespace cfam
 {
@@ -16,6 +17,7 @@ struct FieldMetadata
     ScratchPadReg reg;
     size_t start;
     size_t numBits;
+    std::string desc;
 };
 
 /**

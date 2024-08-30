@@ -65,3 +65,34 @@ be used by the sibling to know the management daemon is alive.
 
 **FW Version**: A hash of the VERSION_ID field in /etc/os-release. This is used
 to tell if the BMCs are running the same version of code.
+
+## Debug
+
+The `cfamstool` application can read the CFAMs and display their fields:
+
+```sh
+$ ./cfamstool -d
+Local BMC CFAM-S scratchpad fields
+API Version                0x1
+BMC Position               0x0
+Role                       xyz.openbmc_project.State.BMC.Redundancy.Role.Active
+Redundancy Enabled         false
+Failovers Paused           false
+Provisioned                true
+BMC State                  xyz.openbmc_project.State.BMC.BMCState.Ready
+Sibling Communication OK   true
+Heartbeat                  0x25
+FW Version                 0x1c9c4045
+
+Sibling BMC CFAM-S scratchpad fields
+API Version                0x1
+BMC Position               0x1
+Role                       xyz.openbmc_project.State.BMC.Redundancy.Role.Passive
+Redundancy Enabled         false
+Failovers Paused           false
+Provisioned                true
+BMC State                  xyz.openbmc_project.State.BMC.BMCState.Ready
+Sibling Communication OK   true
+Heartbeat                  0x24
+FW Version                 0x1c9c4045
+```

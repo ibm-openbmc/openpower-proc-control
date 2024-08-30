@@ -63,10 +63,10 @@ TEST(CFAMFields, GetFieldValueRegsTest)
                 {ScratchPadReg::three, 0x00500000}};
 
     // The actual extraction is tested in GetFieldValueTest
-    FieldMetadata meta1{ScratchPadReg::two, 0, 1};
-    FieldMetadata meta2{ScratchPadReg::two, 9, 5};
-    FieldMetadata meta3{ScratchPadReg::three, 9, 5};
-    FieldMetadata meta4{ScratchPadReg::four, 0, 1};
+    FieldMetadata meta1{ScratchPadReg::two, 0, 1, "a"};
+    FieldMetadata meta2{ScratchPadReg::two, 9, 5, "a"};
+    FieldMetadata meta3{ScratchPadReg::three, 9, 5, "a"};
+    FieldMetadata meta4{ScratchPadReg::four, 0, 1, "a"};
 
     EXPECT_EQ(getFieldValue(regs, meta1), 1);
     EXPECT_EQ(getFieldValue(regs, meta2), 0);
@@ -85,29 +85,33 @@ TEST(CFAMFields, CreateModifyDataTest)
     // List of testcases with the inputs and then the expected ModifyOp values
     const std::vector<std::tuple<Input, ModifyOp>> testcases{
 
-        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 0, 32},
+        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 0, 32, "a"},
                          0x11111111},
                    ModifyOp{ScratchPadReg::three, 0x11111111, 0xFFFFFFFF}},
 
-        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 0, 1}, 0x0},
+        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 0, 1, "a"}, 0x0},
                    ModifyOp{ScratchPadReg::three, 0x0, 0x80000000}},
 
-        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 0, 1}, 0x1},
+        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 0, 1, "a"}, 0x1},
                    ModifyOp{ScratchPadReg::three, 0x80000000, 0x80000000}},
 
-        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 31, 1}, 0x1},
+        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 31, 1, "a"}, 0x1},
                    ModifyOp{ScratchPadReg::three, 0x1, 0x00000001}},
 
-        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 31, 1}, 0x0},
+        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 31, 1, "a"}, 0x0},
                    ModifyOp{ScratchPadReg::three, 0x0, 0x00000001}},
 
-        std::tuple{Input{FieldMetadata{ScratchPadReg::one, 4, 8}, 0x55},
-                   ModifyOp{ScratchPadReg::one, 0x05500000, 0x0FF00000}},
+        std::tuple{Input{FieldMetadata{ScratchPadReg::three, 0, 1, "a"}, 0x1},
+                   ModifyOp{ScratchPadReg::three, 0x80000000, 0x80000000}},
 
-        std::tuple{Input{FieldMetadata{ScratchPadReg::two, 19, 3}, 0x5},
+        std::tuple{Input{FieldMetadata{ScratchPadReg::one, 4, 8, "a"}, 0x55},
+                   ModifyOp{ScratchPadReg::one, 0x05500000, 0xFF00000}},
+
+        std::tuple{Input{FieldMetadata{ScratchPadReg::two, 19, 3, "a"}, 0x5},
                    ModifyOp{ScratchPadReg::two, 0x00001400, 0x00001C00}},
 
-        std::tuple{Input{FieldMetadata{ScratchPadReg::two, 11, 20}, 0x34343},
+        std::tuple{Input{FieldMetadata{ScratchPadReg::two, 11, 20, "a"},
+                         0x34343},
                    ModifyOp{ScratchPadReg::two, 0x00068686, 0x001FFFFE}}};
 
     for (const auto& [metaAndValue, expected] : testcases)

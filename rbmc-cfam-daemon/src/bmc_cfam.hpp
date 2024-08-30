@@ -42,16 +42,19 @@ class BMCCFAM
      * @brief The register, starting bit, and length of the fields.
      */
     inline static const std::map<Field, cfam::FieldMetadata> cfamFields{
-        {Field::apiVersion, {cfam::ScratchPadReg::one, 0, 8}},
-        {Field::bmcPosition, {cfam::ScratchPadReg::one, 8, 1}},
-        {Field::role, {cfam::ScratchPadReg::one, 9, 2}},
-        {Field::redundancyEnabled, {cfam::ScratchPadReg::one, 11, 1}},
-        {Field::failoversPaused, {cfam::ScratchPadReg::one, 12, 1}},
-        {Field::provisioned, {cfam::ScratchPadReg::one, 13, 1}},
-        {Field::bmcState, {cfam::ScratchPadReg::one, 14, 3}},
-        {Field::siblingCommsOK, {cfam::ScratchPadReg::one, 17, 1}},
-        {Field::heartbeat, {cfam::ScratchPadReg::one, 24, 8}},
-        {Field::fwVersion, {cfam::ScratchPadReg::two, 0, 32}}};
+        {Field::apiVersion, {cfam::ScratchPadReg::one, 0, 8, "API Version"}},
+        {Field::bmcPosition, {cfam::ScratchPadReg::one, 8, 1, "BMC Position"}},
+        {Field::role, {cfam::ScratchPadReg::one, 9, 2, "Role"}},
+        {Field::redundancyEnabled,
+         {cfam::ScratchPadReg::one, 11, 1, "Redundancy Enabled"}},
+        {Field::failoversPaused,
+         {cfam::ScratchPadReg::one, 12, 1, "Failovers Paused"}},
+        {Field::provisioned, {cfam::ScratchPadReg::one, 13, 1, "Provisioned"}},
+        {Field::bmcState, {cfam::ScratchPadReg::one, 14, 3, "BMC State"}},
+        {Field::siblingCommsOK,
+         {cfam::ScratchPadReg::one, 17, 1, "Sibling Communication OK"}},
+        {Field::heartbeat, {cfam::ScratchPadReg::one, 24, 8, "Heartbeat"}},
+        {Field::fwVersion, {cfam::ScratchPadReg::two, 0, 32, "FW Version"}}};
 
     BMCCFAM() = delete;
     virtual ~BMCCFAM() = default;
