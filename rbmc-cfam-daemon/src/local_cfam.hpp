@@ -125,6 +125,15 @@ class LocalCFAM : public BMCCFAM
      */
     void incHeartbeat();
 
+    /**
+     * @brief Reads a field from the CFAM
+     *
+     * @param[in] field - the field to read
+     *
+     * @return - The value read, or an unexpected with the error value.
+     */
+    std::expected<uint32_t, int> readField(Field field);
+
   private:
     /**
      * @brief Writes the field to the CFAM
@@ -136,15 +145,6 @@ class LocalCFAM : public BMCCFAM
      * @return int - 0 if successful, nonzero else
      */
     int writeField(Field field, uint32_t value);
-
-    /**
-     * @brief Reads a field from the CFAM
-     *
-     * @param[in] field - the field to read
-     *
-     * @return - The value read, or an unexpected with the error value.
-     */
-    std::expected<uint32_t, int> readField(Field field);
 
     /**
      * @brief The current heartbeat value.

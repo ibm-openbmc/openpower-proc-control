@@ -157,6 +157,7 @@ sdbusplus_dep = dependency('sdbusplus')
 sdeventplus_dep = dependency('sdeventplus')
 pdi_dep = dependency('phosphor-dbus-interfaces')
 phosphor_logging_dep = dependency('phosphor-logging')
+cli11_dep = dependency('CLI11')
 
 gtest_dep = dependency(
     'gtest',
