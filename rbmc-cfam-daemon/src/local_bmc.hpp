@@ -42,6 +42,15 @@ class LocalBMC
      */
     sdbusplus::async::task<> start();
 
+    /**
+     * @brief Sets the 'sibling communications OK' bit in the local CFAM.
+     *
+     * This represents if this local BMC could read the sibling's CFAM or not.
+     *
+     * @param[in] ok - If these communications are good or not.
+     */
+    void setSiblingCommsOK(bool ok);
+
   private:
     using Role =
         sdbusplus::common::xyz::openbmc_project::state::bmc::Redundancy::Role;
@@ -133,4 +142,12 @@ class LocalBMC
      * @brief Object to read data from the system.
      */
     std::unique_ptr<Services> services;
+
+    /**
+     * @brief The current sibling communications OK value.
+     *
+     * Used so that the CFAM doesn't have to be written
+     * on every poll.
+     */
+    bool siblingOK{false};
 };

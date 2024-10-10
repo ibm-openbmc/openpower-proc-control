@@ -261,6 +261,12 @@ unit_files = [
     'service_files/op-enter-mpreboot@.service',
 ] + extra_unit_files
 
+if get_option('rbmc-cfam-daemon').allowed()
+  unit_files += [
+      'service_files/xyz.openbmc_project.State.BMC.Redundancy.Sibling.service'
+  ]
+endif
+
 systemd_system_unit_dir = dependency('systemd').get_variable(
     'systemdsystemunitdir',
     pkgconfig_define: ['prefix', get_option('prefix')])

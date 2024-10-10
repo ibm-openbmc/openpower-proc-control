@@ -2,6 +2,7 @@
 #pragma once
 
 #include "local_bmc.hpp"
+#include "sibling_bmc.hpp"
 #include "sysfs.hpp"
 
 #include <sdbusplus/async.hpp>
@@ -48,4 +49,11 @@ class Application
      * @brief Handles logic for the local BMC.
      */
     LocalBMC localBMC;
+
+    /**
+     * @brief Handles logic for the sibling BMC.
+     *
+     * Only created if sibling is present.
+     */
+    std::unique_ptr<SiblingBMC> siblingBMC;
 };
