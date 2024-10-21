@@ -1,0 +1,13 @@
+[Unit]
+Description=Redundant BMC Sibling service
+Wants=xyz.openbmc_project.State.BMC.service
+After=xyz.openbmc_project.State.BMC.service
+
+[Service]
+ExecStart=/usr/libexec/openpower-proc-control/rbmc-cfamd
+Restart=always
+Type=dbus
+BusName=xyz.openbmc_project.State.BMC.Redundancy.Sibling
+
+[Install]
+WantedBy=multi-user.target
