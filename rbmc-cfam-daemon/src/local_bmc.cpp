@@ -72,6 +72,7 @@ void LocalBMC::writeBMCPosition()
 void LocalBMC::writeSiblingCommsNotOK()
 {
     cfam.writeSiblingCommsOK(false);
+    siblingOK = false;
 }
 
 void LocalBMC::writeProvisioned()
@@ -134,4 +135,12 @@ sdbusplus::async::task<> LocalBMC::writeBMCState()
     }
 
     co_return;
+}
+void LocalBMC::setSiblingCommsOK(bool ok)
+{
+    if (ok != siblingOK)
+    {
+        cfam.writeSiblingCommsOK(ok);
+        siblingOK = ok;
+    }
 }
