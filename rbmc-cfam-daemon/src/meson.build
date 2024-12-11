@@ -2,10 +2,13 @@
 
 installdir = join_paths(get_option('libexecdir'), 'openpower-proc-control')
 
+ssl_dep = dependency('openssl')
+
 cfam_deps = [
       sdbusplus_dep,
       pdi_dep,
       phosphor_logging_dep,
+      ssl_dep,
 ]
 
 sources = [
