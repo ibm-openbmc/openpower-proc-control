@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "local_bmc.hpp"
 
+#include <openssl/evp.h>
+
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/async.hpp>
 #include <xyz/openbmc_project/State/BMC/Redundancy/common.hpp>
@@ -59,9 +61,22 @@ void LocalBMC::writeFWVersion()
 
     auto versionID = services->getFWVersionID(osRelease);
 
-    // Write the hash to the CFAM
-    uint32_t version = std::hash<std::string>{}(versionID);
-    cfam.writeFWVersion(version);
+    // Write the SHA512 hash to the CFAM
+    using EVP_MD_CTX_Ptr =
+        std::unique_ptr<EVP_MD_CTX, decltype(&::EVP_MD_CTX_free)>;
+
+    std::array<unsigned char, EVP_MAX_MD_SIZE> digest{};
+    EVP_MD_CTX_Ptr context(EVP_MD_CTX_new(), &::EVP_MD_CTX_free);
+
+    EVP_DigestInit(context.get(), EVP_sha512());
+    EVP_DigestUpdate(context.get(), versionID.c_str(),
+                     strlen(versionID.c_str()));
+    EVP_DigestFinal(context.get(), digest.data(), nullptr);
+
+    auto versionStr = std::format("{:02X}{:02X}{:02X}{:02X}", digest[0],
+                                  digest[1], digest[2], digest[3]);
+
+    cfam.writeFWVersion(std::stoul(versionStr, nullptr, 16));
 }
 
 void LocalBMC::writeBMCPosition()
