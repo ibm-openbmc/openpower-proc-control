@@ -129,6 +129,16 @@ class LocalBMC
     void redEnabledChanged(bool enabled);
 
     /**
+     * @brief Callback function for when the failovers paused
+     * D-Bus property changes.
+     *
+     * Writes the new value into the CFAM.
+     *
+     * @param[in] paused - Value to write
+     */
+    void failoversPausedChanged(bool paused);
+
+    /**
      * @brief The context object
      */
     sdbusplus::async::context& ctx;
