@@ -40,9 +40,11 @@ sdbusplus::async::task<std::string>
 Services::Services(sdbusplus::async::context& ctx,
                    BMCStateCallback&& stateCallback,
                    RoleCallback&& roleCallback,
-                   RedEnabledCallback&& redEnabledCallback) :
+                   RedEnabledCallback&& redEnabledCallback,
+                   FailoversPausedCallback&& failoversPausedCallback) :
     ctx(ctx), bmcStateCallback(std::move(stateCallback)),
-    roleCallback(roleCallback), redEnabledCallback(redEnabledCallback)
+    roleCallback(roleCallback), redEnabledCallback(redEnabledCallback),
+    failoversPausedCallback(failoversPausedCallback)
 {
     startup();
 }
@@ -143,7 +145,7 @@ sdbusplus::async::task<Services::BMCState> Services::getBMCState()
     co_return co_await stateMgr.current_bmc_state();
 }
 
-sdbusplus::async::task<std::tuple<Services::Role, bool>>
+sdbusplus::async::task<std::tuple<Services::Role, bool, bool>>
     Services::getRedundancyProps()
 {
     auto service = co_await util::getService(
@@ -159,7 +161,8 @@ sdbusplus::async::task<std::tuple<Services::Role, bool>>
             .get_all_properties<bmc_ns::Redundancy::PropertiesVariant>(ctx);
     auto role = std::get<Role>(props.at("Role"));
     auto enabled = std::get<bool>(props.at("RedundancyEnabled"));
-    co_return std::make_tuple(role, enabled);
+    auto paused = std::get<bool>(props.at("FailoversPaused"));
+    co_return std::make_tuple(role, enabled, paused);
 }
 
 sdbusplus::async::task<> Services::watchBMCStateProp()
@@ -211,6 +214,12 @@ sdbusplus::async::task<> Services::watchRedundancyProps()
         if (it != propertyMap.end())
         {
             redEnabledCallback(std::get<bool>(it->second));
+        }
+
+        it = propertyMap.find("FailoversPaused");
+        if (it != propertyMap.end())
+        {
+            failoversPausedCallback(std::get<bool>(it->second));
         }
     }
     co_return;
@@ -264,6 +273,12 @@ sdbusplus::async::task<> Services::watchBMCInterfaceAdded()
             if (propIt != props.end())
             {
                 redEnabledCallback(std::get<bool>(propIt->second));
+            }
+
+            propIt = props.find("FailoversPaused");
+            if (propIt != props.end())
+            {
+                failoversPausedCallback(std::get<bool>(propIt->second));
             }
         }
     }
