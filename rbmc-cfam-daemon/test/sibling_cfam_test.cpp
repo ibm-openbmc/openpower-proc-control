@@ -1,25 +1,26 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "mock_driver.hpp"
 #include "sibling_cfam.hpp"
+#include "test_utils.hpp"
 
 #include <gtest/gtest.h>
 
 using ::testing::Return;
 
-TEST(SiblingCFAMTest, TestReads)
+class SiblingCFAMTest : public CFAMSDevice
+{};
+
+TEST_F(SiblingCFAMTest, TestReads)
 {
     using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
 
     SiblingCFAM sibling{1, driver};
 
-    std::filesystem::path reg1{
-        "/sys/class/fsi-master/fsi1/slave@00:00/scratch1"};
-    std::filesystem::path reg2{
-        "/sys/class/fsi-master/fsi1/slave@00:00/scratch2"};
-
-    EXPECT_CALL(driver, read(reg1)).WillOnce(Return(Expected(0x01DDFFFF)));
-    EXPECT_CALL(driver, read(reg2)).WillOnce(Return(Expected(0x12345678)));
+    EXPECT_CALL(driver, read(link1Device, 0))
+        .WillOnce(Return(Expected(0x01DDFFFF)));
+    EXPECT_CALL(driver, read(link1Device, 1))
+        .WillOnce(Return(Expected(0x12345678)));
 
     // Before first read, in error state
     EXPECT_TRUE(sibling.hasError());
@@ -41,16 +42,14 @@ TEST(SiblingCFAMTest, TestReads)
     EXPECT_EQ(sibling.getFWVersion(), 0x12345678);
 }
 
-TEST(SiblingCFAMTest, TestReadFail)
+TEST_F(SiblingCFAMTest, TestReadFail)
 {
     MockDriver driver;
 
     SiblingCFAM sibling{1, driver};
 
-    std::filesystem::path reg1{
-        "/sys/class/fsi-master/fsi1/slave@00:00/scratch1"};
-
-    EXPECT_CALL(driver, read(reg1)).WillRepeatedly(Return(std::unexpected{1}));
+    EXPECT_CALL(driver, read(link1Device, 0))
+        .WillRepeatedly(Return(std::unexpected{1}));
 
     sibling.readAll();
 

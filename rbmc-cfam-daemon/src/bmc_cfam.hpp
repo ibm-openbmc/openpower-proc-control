@@ -91,7 +91,7 @@ class BMCCFAM
      * @brief Says if the CFAM is ready, i.e. the driver created the
      *        correct files.
      */
-    inline bool isReady() const
+    inline bool isReady()
     {
         return cfamAccess.exists();
     }

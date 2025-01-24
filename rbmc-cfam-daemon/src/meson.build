@@ -13,6 +13,7 @@ sources = [
     'driver.cpp',
     'local_bmc.cpp',
     'local_cfam.cpp',
+    'paths.cpp',
     'sibling_cfam.cpp',
     'sibling_bmc.cpp',
     'services.cpp',
@@ -33,6 +34,7 @@ executable(
     'cfams_tool.cpp',
     'driver.cpp',
     'local_cfam.cpp',
+    'paths.cpp',
     dependencies: [cfam_deps, cli11_dep],
     install: true,
 )

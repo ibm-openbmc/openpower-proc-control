@@ -60,7 +60,7 @@ class SiblingBMC
      *
      * @return bool - if the CFAM could be read without an error.
      */
-    bool ok() const
+    bool ok()
     {
         return cfam.isReady() && !cfam.hasError();
     }

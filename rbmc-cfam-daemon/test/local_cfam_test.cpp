@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "local_cfam.hpp"
 #include "mock_driver.hpp"
+#include "test_utils.hpp"
 
 #include <gtest/gtest.h>
 
+using ::testing::_;
 using ::testing::Return;
 
-TEST(LocalCFAMTest, GetMaxValueTest)
+class LocalCFAMTest : public CFAMSDevice
+{};
+
+TEST_F(LocalCFAMTest, GetMaxValueTest)
 {
     EXPECT_EQ(local_cfam_util::getMaxValue(4), 0xF);
     EXPECT_EQ(local_cfam_util::getMaxValue(8), 0xFF);
@@ -14,161 +19,132 @@ TEST(LocalCFAMTest, GetMaxValueTest)
     EXPECT_EQ(local_cfam_util::getMaxValue(24), 0x00FFFFFF);
 }
 
-TEST(LocalCFAMTest, TestWriteApiVersion)
+TEST_F(LocalCFAMTest, TestWriteApiVersion)
 {
-    using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg)).WillOnce(Return(Expected(0)));
-    EXPECT_CALL(driver, write(reg, 0xFF000000)).WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0xFF000000, 0xFF000000))
+        .WillOnce(Return(0));
 
     cfam.writeApiVersion(0xFF);
 }
 
-TEST(LocalCFAMTest, TestWriteBMCPosition)
+TEST_F(LocalCFAMTest, TestWriteBMCPosition)
 {
-    using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg)).WillOnce(Return(Expected(0)));
-    EXPECT_CALL(driver, write(reg, 0x00800000)).WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00800000, 0x00800000))
+        .WillOnce(Return(0));
 
     cfam.writeBMCPosition(1);
 }
 
-TEST(LocalCFAMTest, TestWriteRole)
+TEST_F(LocalCFAMTest, TestWriteRole)
 {
-    using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg)).WillOnce(Return(Expected(0)));
-    EXPECT_CALL(driver, write(reg, 0x00400000)).WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00400000, 0x00600000))
+        .WillOnce(Return(0));
 
     cfam.writeRole(LocalCFAM::Role::Passive);
 }
 
-TEST(LocalCFAMTest, TestWriteRedundancyEnabled)
+TEST_F(LocalCFAMTest, TestWriteRedundancyEnabled)
 {
-    using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg)).WillOnce(Return(Expected(0)));
-    EXPECT_CALL(driver, write(reg, 0x00100000)).WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00100000, 0x00100000))
+        .WillOnce(Return(0));
 
     cfam.writeRedundancyEnabled(true);
 }
 
-TEST(LocalCFAMTest, TestWriteFailoversPaused)
+TEST_F(LocalCFAMTest, TestWriteFailoversPaused)
 {
-    using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg)).WillOnce(Return(Expected(0)));
-    EXPECT_CALL(driver, write(reg, 0x00080000)).WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00080000, 0x00080000))
+        .WillOnce(Return(0));
 
     cfam.writeFailoversPaused(true);
 }
-TEST(LocalCFAMTest, TestWriteProvisioned)
+TEST_F(LocalCFAMTest, TestWriteProvisioned)
 {
-    using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg)).WillOnce(Return(Expected(0)));
-    EXPECT_CALL(driver, write(reg, 0x00040000)).WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00040000, 0x00040000))
+        .WillOnce(Return(0));
 
     cfam.writeProvisioned(true);
 }
 
-TEST(LocalCFAMTest, TestWriteBMCState)
+TEST_F(LocalCFAMTest, TestWriteBMCState)
 {
-    using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg)).WillOnce(Return(Expected(0)));
-    EXPECT_CALL(driver, write(reg, 0x00018000)).WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00018000, 0x00038000))
+        .WillOnce(Return(0));
 
     cfam.writeBMCState(LocalCFAM::BMCState::Quiesced);
 }
 
-TEST(LocalCFAMTest, TestWriteSiblingCommsOK)
+TEST_F(LocalCFAMTest, TestWriteSiblingCommsOK)
 {
-    using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg)).WillOnce(Return(Expected(0)));
-    EXPECT_CALL(driver, write(reg, 0x00004000)).WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00004000, 0x00004000))
+        .WillOnce(Return(0));
 
     cfam.writeSiblingCommsOK(true);
 }
 
-TEST(LocalCFAMTest, TestWriteFWVersion)
+TEST_F(LocalCFAMTest, TestWriteFWVersion)
 {
-    using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch2"};
 
-    EXPECT_CALL(driver, read(reg)).WillOnce(Return(Expected(0)));
-    EXPECT_CALL(driver, write(reg, 0x12345678)).WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 1, 0x12345678, 0xFFFFFFFF))
+        .WillOnce(Return(0));
 
     cfam.writeFWVersion(0x12345678);
 }
 
-TEST(LocalCFAMTest, TestIncHeartbeat)
+TEST_F(LocalCFAMTest, TestIncHeartbeat)
 {
     using Expected = std::expected<uint32_t, int>;
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg))
-        .WillOnce(Return(Expected(0x000000FE)))  // Get initial HB
-        .WillOnce(Return(Expected(0x000000FE)))  // RMW 1
-        .WillOnce(Return(Expected(0x000000FF)))  // RMW 2
-        .WillOnce(Return(Expected(0x00000000))); // RMW 3
-    EXPECT_CALL(driver, write(reg, 0x000000FF)).WillOnce(Return(0));
-    EXPECT_CALL(driver, write(reg, 0x00000000)).WillOnce(Return(0));
-    EXPECT_CALL(driver, write(reg, 0x00000001)).WillOnce(Return(0));
+    EXPECT_CALL(driver, read(link0Device, 0))
+        .WillOnce(Return(Expected(0x000000FE))); // Get initial HB
+
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x000000FF, 0xFF))
+        .WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00000000, 0xFF))
+        .WillOnce(Return(0));
+    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00000001, 0xFF))
+        .WillOnce(Return(0));
 
     cfam.incHeartbeat();
     cfam.incHeartbeat();
     cfam.incHeartbeat();
 }
 
-TEST(LocalCFAMTest, TestWriteFails)
+TEST_F(LocalCFAMTest, TestWriteFails)
 {
     MockDriver driver;
     LocalCFAM cfam{0, driver};
-    std::filesystem::path reg{
-        "/sys/class/fsi-master/fsi0/slave@00:00/scratch1"};
 
-    EXPECT_CALL(driver, read(reg)).WillRepeatedly(Return(std::unexpected{1}));
+    EXPECT_CALL(driver, writeWithMask(link0Device, _, _, _))
+        .WillRepeatedly(Return(-1));
 
     EXPECT_THROW(cfam.writeApiVersion(0xFF), std::system_error);
     EXPECT_THROW(cfam.writeRole(LocalCFAM::Role::Passive), std::system_error);
