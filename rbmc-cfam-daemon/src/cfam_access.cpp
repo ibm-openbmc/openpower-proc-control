@@ -1,46 +1,59 @@
 // SPDX-License-Identifier: Apache-2.0
 #include "cfam_access.hpp"
 
+#include "paths.hpp"
+
 #include <fcntl.h>
 #include <unistd.h>
 
 #include <phosphor-logging/lg2.hpp>
 
-#include <unordered_map>
+#include <utility>
 
 namespace fs = std::filesystem;
 
-const std::unordered_map<cfam::ScratchPadReg, std::string> scratchPadRegNames{
-    {cfam::ScratchPadReg::one, "scratch1"},
-    {cfam::ScratchPadReg::two, "scratch2"},
-    {cfam::ScratchPadReg::three, "scratch3"},
-    {cfam::ScratchPadReg::four, "scratch4"}};
-
-fs::path CFAMAccess::getRegisterPath(cfam::ScratchPadReg reg) const
+bool CFAMAccess::exists()
 {
-    return std::format("/sys/class/fsi-master/fsi{}/slave@00:00/{}", link,
-                       scratchPadRegNames.at(reg));
+    if (devicePath.empty())
+    {
+        findDevicePath();
+    }
+    return !devicePath.empty();
 }
 
-bool CFAMAccess::exists() const
+fs::path CFAMAccess::findDevicePath() const
 {
-    auto path = getRegisterPath(cfam::ScratchPadReg::one);
+    auto path = paths::getFSIMasterDir() /
+                std::format("fsi{}/slave@00:00/{:02}:00:00:13", link, link);
+
+    if (!fs::exists(path))
+    {
+        lg2::debug("{PATH} doesn't exist!", "PATH", path);
+        return {};
+    }
 
     try
     {
-        return fs::exists(path);
+        for (const auto& entry : fs::directory_iterator(path))
+        {
+            if (entry.path().filename().string().starts_with("mbox-cfam-s"))
+            {
+                // Return the path in /dev
+                return paths::getDeviceDir() / entry.path().filename();
+            }
+        }
     }
     catch (const std::exception& e)
     {
-        lg2::error("Failed calling filesystem::exists on {FILE}: {ERR}", "FILE",
-                   path, "ERR", e);
+        lg2::error("Failure iterating {PATH}: {ERROR}", "PATH", path, "ERROR",
+                   e);
     }
-    return false;
+    return {};
 }
 
 std::expected<uint32_t, int> CFAMAccess::readScratchReg(cfam::ScratchPadReg reg)
 {
-    return driver.read(getRegisterPath(reg));
+    return driver.read(devicePath, std::to_underlying(reg));
 }
 
 CFAMAccess::RegMapExpected
@@ -66,22 +79,11 @@ CFAMAccess::RegMapExpected
 
 int CFAMAccess::writeScratchReg(cfam::ScratchPadReg reg, uint32_t data)
 {
-    return driver.write(getRegisterPath(reg), data);
+    return driver.write(devicePath, std::to_underlying(reg), data);
 }
 
 int CFAMAccess::writeScratchRegWithMask(const cfam::ModifyOp& op)
 {
-    auto regData = readScratchReg(op.reg);
-    if (!regData.has_value())
-    {
-        return regData.error();
-    }
-
-    // Clear all bits in the field
-    *regData &= ~op.mask;
-
-    // Now set the bits
-    *regData |= (op.data & op.mask);
-
-    return writeScratchReg(op.reg, *regData);
+    return driver.writeWithMask(devicePath, std::to_underlying(op.reg), op.data,
+                                op.mask);
 }

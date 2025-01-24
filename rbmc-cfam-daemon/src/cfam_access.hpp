@@ -21,8 +21,11 @@ class CFAMAccess
   public:
     using RegMapExpected = std::expected<cfam::RegMap, int>;
 
-    CFAMAccess() = delete;
     ~CFAMAccess() = default;
+    CFAMAccess(const CFAMAccess&) = delete;
+    CFAMAccess& operator=(const CFAMAccess&) = delete;
+    CFAMAccess(CFAMAccess&&) = delete;
+    CFAMAccess& operator=(CFAMAccess&&) = delete;
 
     /**
      * @brief Constructor
@@ -30,7 +33,9 @@ class CFAMAccess
      * @param[in] link - The BMC's FSI link the CFAM is on.
      * @param[in] driver - A mockable object for accessing the driver.
      */
-    CFAMAccess(size_t link, Driver& driver) : link(link), driver(driver) {}
+    CFAMAccess(size_t link, Driver& driver) :
+        link(link), driver(driver), devicePath(findDevicePath())
+    {}
 
     /**
      * @brief Reads all scratchpad registers passed into the function.
@@ -76,17 +81,15 @@ class CFAMAccess
      *
      * @return a bool indicating if it exists.
      */
-    bool exists() const;
+    bool exists();
 
   private:
     /**
-     * @brief Makes the driver path to use to access the register
+     * @brief Finds the /dev device path for this CFAM.
      *
-     * @param[in] reg - The register to find the path for
-     *
-     * @return path - The path to the driver file
+     * @return The device path
      */
-    std::filesystem::path getRegisterPath(cfam::ScratchPadReg reg) const;
+    std::filesystem::path findDevicePath() const;
 
     /**
      * @brief The BMC's FSI link the CFAM is on
@@ -97,4 +100,9 @@ class CFAMAccess
      * @brief Driver object
      */
     Driver& driver;
+
+    /**
+     * @brief The /dev device path for the CFAM.
+     */
+    std::filesystem::path devicePath;
 };
