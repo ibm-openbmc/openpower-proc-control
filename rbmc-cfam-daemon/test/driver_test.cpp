@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
-#include "sysfs.hpp"
+#include "driver.hpp"
 
 #include <format>
 #include <fstream>
 
 #include <gtest/gtest.h>
 
-class SysFSTest : public ::testing::Test
+class DriverTest : public ::testing::Test
 {
   protected:
     static void SetUpTestCase()
     {
-        char d[] = "/tmp/sysfstestXXXXXX";
+        char d[] = "/tmp/drivertestXXXXXX";
         dir = mkdtemp(d);
     }
 
@@ -42,26 +42,26 @@ class SysFSTest : public ::testing::Test
     static std::filesystem::path dir;
 };
 
-std::filesystem::path SysFSTest::dir;
+std::filesystem::path DriverTest::dir;
 
-TEST_F(SysFSTest, SysFSTest)
+TEST_F(DriverTest, DriverTest)
 {
-    SysFSImpl sysfs;
-    auto path = SysFSTest::dir / "scratch1";
+    DriverImpl driver;
+    auto path = DriverTest::dir / "scratch1";
 
     // Create the file
     initFile(path.c_str(), 0x00000000);
 
-    EXPECT_EQ(sysfs.write(path, 0x12345678), 0);
+    EXPECT_EQ(driver.write(path, 0x12345678), 0);
 
-    EXPECT_EQ(sysfs.read(path), 0x12345678);
+    EXPECT_EQ(driver.read(path), 0x12345678);
 
-    path = SysFSTest::dir / "scratch2";
-
-    // Doesn't exist
-    EXPECT_EQ(sysfs.read(path), std::unexpected<int>{ENOENT});
+    path = DriverTest::dir / "scratch2";
 
     // Doesn't exist
-    path = SysFSTest::dir / "scratch2";
-    EXPECT_EQ(sysfs.write(path, 0x12345678), ENOENT);
+    EXPECT_EQ(driver.read(path), std::unexpected<int>{ENOENT});
+
+    // Doesn't exist
+    path = DriverTest::dir / "scratch2";
+    EXPECT_EQ(driver.write(path, 0x12345678), ENOENT);
 }

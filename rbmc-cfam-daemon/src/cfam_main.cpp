@@ -4,12 +4,12 @@
 int main()
 {
     sdbusplus::async::context ctx;
-    std::unique_ptr<SysFS> sysfs = std::make_unique<SysFSImpl>();
+    std::unique_ptr<Driver> driver = std::make_unique<DriverImpl>();
 
     sdbusplus::server::manager_t objMgr{
         ctx, SiblingInterface::namespace_path::value};
 
-    Application app{ctx, std::move(sysfs)};
+    Application app{ctx, std::move(driver)};
 
     ctx.spawn([](sdbusplus::async::context& ctx) -> sdbusplus::async::task<> {
         ctx.request_name(SiblingInterface::interface);

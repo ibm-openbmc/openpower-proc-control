@@ -36,10 +36,10 @@ class SiblingCFAM : public BMCCFAM
      * @brief Constructor
      *
      * @param[in] link - The link the CFAM is on
-     * @param[in] sysfs - The sysfs object
+     * @param[in] driver - The driver object
      */
-    SiblingCFAM(size_t link, SysFS& sysfs) :
-        BMCCFAM(link, sysfs), usedRegs(BMCCFAM::getUsedRegs())
+    SiblingCFAM(size_t link, Driver& driver) :
+        BMCCFAM(link, driver), usedRegs(BMCCFAM::getUsedRegs())
     {}
 
     /**

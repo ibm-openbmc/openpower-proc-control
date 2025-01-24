@@ -4,18 +4,18 @@
 #include <filesystem>
 
 /**
- * @class SysFS
+ * @class Driver
  *
  * Abstract base class to provide read and write functions.
  */
-class SysFS
+class Driver
 {
   public:
-    SysFS() = default;
-    virtual ~SysFS() = default;
+    Driver() = default;
+    virtual ~Driver() = default;
 
     /**
-     * @brief Reads a CFAM register via a sysfs file
+     * @brief Reads a CFAM scratch register
      *
      * @param[in] file - The sysfs file to read
      *
@@ -26,7 +26,7 @@ class SysFS
         const std::filesystem::path& file) const = 0;
 
     /**
-     * @brief Writes a CFAM register via a sysfs file
+     * @brief Writes a CFAM register
      *
      * @param[in] file - The sysfs file to write
      * @param[in] value - The value to write
@@ -38,23 +38,23 @@ class SysFS
 };
 
 /**
- * @class SysFSImpl
+ * @class DriverImpl
  *
- * The implementation of the SysFS class.
+ * The implementation of the Driver class.
  */
-class SysFSImpl : public SysFS
+class DriverImpl : public Driver
 {
   public:
-    SysFSImpl() = default;
+    DriverImpl() = default;
 
     /**
-     * @copydoc SysFS::read
+     * @copydoc Driver::read
      */
     std::expected<uint32_t, int> read(
         const std::filesystem::path& file) const override;
 
     /**
-     * @copydoc SysFS::write
+     * @copydoc Driver::write
      */
     int write(const std::filesystem::path& file, uint32_t value) const override;
 };

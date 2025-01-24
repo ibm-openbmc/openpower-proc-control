@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
-#include "sysfs.hpp"
+#include "driver.hpp"
 
 #include <gmock/gmock.h>
 
-class MockSysFS : public SysFS
+class MockDriver : public Driver
 {
   public:
     MOCK_METHOD((std::expected<uint32_t, int>), read,
