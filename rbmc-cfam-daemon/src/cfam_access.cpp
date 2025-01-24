@@ -40,7 +40,7 @@ bool CFAMAccess::exists() const
 
 std::expected<uint32_t, int> CFAMAccess::readScratchReg(cfam::ScratchPadReg reg)
 {
-    return sysfs.read(getRegisterPath(reg));
+    return driver.read(getRegisterPath(reg));
 }
 
 CFAMAccess::RegMapExpected
@@ -66,7 +66,7 @@ CFAMAccess::RegMapExpected
 
 int CFAMAccess::writeScratchReg(cfam::ScratchPadReg reg, uint32_t data)
 {
-    return sysfs.write(getRegisterPath(reg), data);
+    return driver.write(getRegisterPath(reg), data);
 }
 
 int CFAMAccess::writeScratchRegWithMask(const cfam::ModifyOp& op)

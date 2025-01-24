@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-#include "mock_sysfs.hpp"
+#include "mock_driver.hpp"
 #include "sibling_cfam.hpp"
 
 #include <gtest/gtest.h>
@@ -9,17 +9,17 @@ using ::testing::Return;
 TEST(SiblingCFAMTest, TestReads)
 {
     using Expected = std::expected<uint32_t, int>;
-    MockSysFS sysfs;
+    MockDriver driver;
 
-    SiblingCFAM sibling{1, sysfs};
+    SiblingCFAM sibling{1, driver};
 
     std::filesystem::path reg1{
         "/sys/class/fsi-master/fsi1/slave@00:00/scratch1"};
     std::filesystem::path reg2{
         "/sys/class/fsi-master/fsi1/slave@00:00/scratch2"};
 
-    EXPECT_CALL(sysfs, read(reg1)).WillOnce(Return(Expected(0x01DDFFFF)));
-    EXPECT_CALL(sysfs, read(reg2)).WillOnce(Return(Expected(0x12345678)));
+    EXPECT_CALL(driver, read(reg1)).WillOnce(Return(Expected(0x01DDFFFF)));
+    EXPECT_CALL(driver, read(reg2)).WillOnce(Return(Expected(0x12345678)));
 
     // Before first read, in error state
     EXPECT_TRUE(sibling.hasError());
@@ -43,14 +43,14 @@ TEST(SiblingCFAMTest, TestReads)
 
 TEST(SiblingCFAMTest, TestReadFail)
 {
-    MockSysFS sysfs;
+    MockDriver driver;
 
-    SiblingCFAM sibling{1, sysfs};
+    SiblingCFAM sibling{1, driver};
 
     std::filesystem::path reg1{
         "/sys/class/fsi-master/fsi1/slave@00:00/scratch1"};
 
-    EXPECT_CALL(sysfs, read(reg1)).WillRepeatedly(Return(std::unexpected{1}));
+    EXPECT_CALL(driver, read(reg1)).WillRepeatedly(Return(std::unexpected{1}));
 
     sibling.readAll();
 

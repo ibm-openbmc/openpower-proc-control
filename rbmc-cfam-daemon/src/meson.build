@@ -16,12 +16,12 @@ sources = [
     'cfam_access.cpp',
     'cfam_fields.cpp',
     'cfam_main.cpp',
+    'driver.cpp',
     'local_bmc.cpp',
     'local_cfam.cpp',
     'sibling_cfam.cpp',
     'sibling_bmc.cpp',
     'services.cpp',
-    'sysfs.cpp',
 ]
 
 executable('rbmc-cfamd',
@@ -37,8 +37,8 @@ executable('cfamstool',
     'cfam_access.cpp',
     'cfam_fields.cpp',
     'cfams_tool.cpp',
+    'driver.cpp',
     'local_cfam.cpp',
-    'sysfs.cpp',
     dependencies: [cfam_deps, cli11_dep],
     install: true
 )

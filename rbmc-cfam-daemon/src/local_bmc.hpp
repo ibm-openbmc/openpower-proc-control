@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 
+#include "driver.hpp"
 #include "local_cfam.hpp"
 #include "services.hpp"
-#include "sysfs.hpp"
 
 #include <sdbusplus/async/context.hpp>
 
@@ -28,10 +28,10 @@ class LocalBMC
      * @brief Constructor
      *
      * @param[in] ctx - The async context object
-     * @param[in] sysfs - The sysfs object
+     * @param[in] driver - The driver object
      */
-    LocalBMC(sdbusplus::async::context& ctx, SysFS& sysfs) :
-        ctx(ctx), cfam(0, sysfs)
+    LocalBMC(sdbusplus::async::context& ctx, Driver& driver) :
+        ctx(ctx), cfam(0, driver)
     {}
 
     /**

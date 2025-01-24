@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-#include "sysfs.hpp"
+#include "driver.hpp"
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -25,7 +25,7 @@ struct Closer
 };
 
 std::expected<uint32_t, int>
-    SysFSImpl::read(const std::filesystem::path& file) const
+    DriverImpl::read(const std::filesystem::path& file) const
 {
     try
     {
@@ -74,7 +74,7 @@ std::expected<uint32_t, int>
     return value;
 }
 
-int SysFSImpl::write(const std::filesystem::path& file, uint32_t value) const
+int DriverImpl::write(const std::filesystem::path& file, uint32_t value) const
 {
     try
     {
