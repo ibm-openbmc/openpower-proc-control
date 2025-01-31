@@ -64,8 +64,8 @@ std::string formatValue(BMCCFAM::Field field, uint32_t value)
 
 void displayCFAMFields(std::string_view name, size_t link)
 {
-    SysFSImpl sysfs;
-    LocalCFAM cfam{link, sysfs};
+    DriverImpl driver;
+    LocalCFAM cfam{link, driver};
 
     std::cout << std::format("{} CFAM-S scratchpad fields\n", name);
 

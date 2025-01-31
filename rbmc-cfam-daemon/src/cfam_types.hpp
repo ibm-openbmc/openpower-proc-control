@@ -10,9 +10,9 @@ namespace cfam
 /**
  * @brief Enums for the CFAM scratchpad registers
  */
-enum class ScratchPadReg
+enum class ScratchPadReg : uint32_t
 {
-    one,
+    one = 0,
     two,
     three,
     four

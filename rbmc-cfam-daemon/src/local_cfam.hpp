@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 #include "bmc_cfam.hpp"
-#include "sysfs.hpp"
+#include "driver.hpp"
 
 #include <xyz/openbmc_project/State/BMC/Redundancy/common.hpp>
 #include <xyz/openbmc_project/State/BMC/common.hpp>
@@ -50,11 +50,11 @@ class LocalCFAM : public BMCCFAM
      * @brief Constructor
      *
      * @param[in] link - The link the CFAM is on
-     * @param[in] sysfs - The sysfs object
+     * @param[in] driver - The driver object
      */
-    LocalCFAM(size_t link, SysFS& sysfs) :
-        BMCCFAM(link, sysfs), maxHeartbeatValue(local_cfam_util::getMaxValue(
-                                  cfamFields.at(Field::heartbeat).numBits))
+    LocalCFAM(size_t link, Driver& driver) :
+        BMCCFAM(link, driver), maxHeartbeatValue(local_cfam_util::getMaxValue(
+                                   cfamFields.at(Field::heartbeat).numBits))
     {}
 
     /**

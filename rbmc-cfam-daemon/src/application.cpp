@@ -4,7 +4,7 @@
 sdbusplus::async::task<> Application::run()
 {
     using namespace std::chrono_literals;
-    CFAMAccess link1{1, *sysfs.get()};
+    CFAMAccess link1{1, *driver.get()};
 
     co_await localBMC.start();
 
@@ -15,7 +15,7 @@ sdbusplus::async::task<> Application::run()
         // if it's there.
         if (!siblingBMC && link1.exists())
         {
-            siblingBMC = std::make_unique<SiblingBMC>(ctx, 1, *sysfs.get());
+            siblingBMC = std::make_unique<SiblingBMC>(ctx, 1, *driver.get());
         }
 
         if (siblingBMC)

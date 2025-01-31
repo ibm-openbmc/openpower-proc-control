@@ -36,10 +36,10 @@ class SiblingBMC
      *
      * @param[in] ctx - The async context object
      * @param[in] link - The FSI link for the CFAM
-     * @param[in] sysfs - The sysfs object
+     * @param[in] driver - The driver object
      */
-    SiblingBMC(sdbusplus::async::context& ctx, size_t link, SysFS& sysfs) :
-        ctx(ctx), cfam(link, sysfs)
+    SiblingBMC(sdbusplus::async::context& ctx, size_t link, Driver& driver) :
+        ctx(ctx), cfam(link, driver)
     {}
 
     /**
@@ -60,7 +60,7 @@ class SiblingBMC
      *
      * @return bool - if the CFAM could be read without an error.
      */
-    bool ok() const
+    bool ok()
     {
         return cfam.isReady() && !cfam.hasError();
     }
@@ -82,7 +82,7 @@ class SiblingBMC
     std::optional<uint32_t> lastHeartbeat;
 
     /**
-     * @brief If the sibling CFAM is ready, meaning its sysfs
+     * @brief If the sibling CFAM is ready, meaning its driver
      *        files are there.
      *
      *        Used as a flag to bound tracing.

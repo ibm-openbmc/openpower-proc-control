@@ -2,7 +2,7 @@
 #pragma once
 
 #include "cfam_types.hpp"
-#include "sysfs.hpp"
+#include "driver.hpp"
 
 #include <unistd.h>
 
@@ -21,16 +21,21 @@ class CFAMAccess
   public:
     using RegMapExpected = std::expected<cfam::RegMap, int>;
 
-    CFAMAccess() = delete;
     ~CFAMAccess() = default;
+    CFAMAccess(const CFAMAccess&) = delete;
+    CFAMAccess& operator=(const CFAMAccess&) = delete;
+    CFAMAccess(CFAMAccess&&) = delete;
+    CFAMAccess& operator=(CFAMAccess&&) = delete;
 
     /**
      * @brief Constructor
      *
      * @param[in] link - The BMC's FSI link the CFAM is on.
-     * @param[in] sysfs - A mockable object for accessing sysfs.
+     * @param[in] driver - A mockable object for accessing the driver.
      */
-    CFAMAccess(size_t link, SysFS& sysfs) : link(link), sysfs(sysfs) {}
+    CFAMAccess(size_t link, Driver& driver) :
+        link(link), driver(driver), devicePath(findDevicePath())
+    {}
 
     /**
      * @brief Reads all scratchpad registers passed into the function.
@@ -72,23 +77,19 @@ class CFAMAccess
     int writeScratchRegWithMask(const cfam::ModifyOp& op);
 
     /**
-     * @brief If the files for the CFAM exist in sysfs.
-     *
-     * Just checks the first, as the driver will create all when bound.
+     * @brief If the CFAM device exists in the filesystem
      *
      * @return a bool indicating if it exists.
      */
-    bool exists() const;
+    bool exists();
 
   private:
     /**
-     * @brief Makes the sysfs path to use to access the register
+     * @brief Finds the /dev device path for this CFAM.
      *
-     * @param[in] reg - The register to find the path for
-     *
-     * @return path - The path to the sysfs file
+     * @return The device path
      */
-    std::filesystem::path getRegisterPath(cfam::ScratchPadReg reg) const;
+    std::filesystem::path findDevicePath() const;
 
     /**
      * @brief The BMC's FSI link the CFAM is on
@@ -96,7 +97,12 @@ class CFAMAccess
     size_t link;
 
     /**
-     * @brief Object to access sysfs with.
+     * @brief Driver object
      */
-    SysFS& sysfs;
+    Driver& driver;
+
+    /**
+     * @brief The /dev device path for the CFAM.
+     */
+    std::filesystem::path devicePath;
 };

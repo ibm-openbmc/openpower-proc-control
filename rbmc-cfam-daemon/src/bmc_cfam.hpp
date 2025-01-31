@@ -56,7 +56,6 @@ class BMCCFAM
         {Field::heartbeat, {cfam::ScratchPadReg::one, 24, 8, "Heartbeat"}},
         {Field::fwVersion, {cfam::ScratchPadReg::two, 0, 32, "FW Version"}}};
 
-    BMCCFAM() = delete;
     virtual ~BMCCFAM() = default;
     BMCCFAM(const BMCCFAM&) = delete;
     BMCCFAM& operator=(const BMCCFAM&) = delete;
@@ -67,9 +66,9 @@ class BMCCFAM
      * @brief Constructor
      *
      * @param[in] link - The link the CFAM is on
-     * @param[in] sysfs - The sysfs API object
+     * @param[in] driver - The driver API object
      */
-    BMCCFAM(size_t link, SysFS& sysfs) : cfamAccess(link, sysfs) {}
+    BMCCFAM(size_t link, Driver& driver) : cfamAccess(link, driver) {}
 
     /**
      * @brief Of the four possible scratchpad registers, returns the ones
@@ -89,10 +88,10 @@ class BMCCFAM
     }
 
     /**
-     * @brief Says if the CFAM is ready, i.e. the driver made the
-     *        correct sysfs files.
+     * @brief Says if the CFAM is ready, i.e. the driver created the
+     *        correct files.
      */
-    inline bool isReady() const
+    inline bool isReady()
     {
         return cfamAccess.exists();
     }
