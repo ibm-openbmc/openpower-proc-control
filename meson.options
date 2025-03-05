@@ -47,3 +47,9 @@ option(
     description: 'Object path requesting OpenPOWER dumps',
 )
 
+option(
+    'rbmc-cfam-daemon',
+    type: 'feature',
+    value: 'enabled',
+    description: 'Enable the RBMC CFAM daemon',
+)

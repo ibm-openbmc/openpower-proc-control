@@ -157,25 +157,33 @@ sdbusplus_dep = dependency('sdbusplus')
 sdeventplus_dep = dependency('sdeventplus')
 pdi_dep = dependency('phosphor-dbus-interfaces')
 phosphor_logging_dep = dependency('phosphor-logging')
+cli11_dep = dependency('CLI11')
 
-gtest = dependency(
+gtest_dep = dependency(
     'gtest',
     main: true,
     disabler: true,
     required: false,
     include_type: 'system',
 )
+gmock_dep = dependency(
+    'gmock',
+    disabler: true,
+    required: false,
+    include_type: 'system',
+)
 if get_option('tests').allowed()
-    if not gtest.found()
-        gtest_proj = import('cmake').subproject('gtest', required: false)
+    if not gtest_dep.found() or not gmock_dep.found()
+        gtest_proj = import('cmake').subproject('googletest', required: false)
         if gtest_proj.found()
-            gtest = declare_dependency(
+            gtest_dep = declare_dependency(
                 dependencies: [
                     dependency('threads'),
                     gtest_proj.dependency('gtest'),
                     gtest_proj.dependency('gtest_main'),
                 ],
             )
+            gmock_dep = gtest_proj.dependency('gmock')
         else
             assert(
                 not get_option('tests').enabled(),
@@ -273,6 +281,12 @@ unit_files = [
     'service_files/op-enter-mpreboot@.service',
 ] + extra_unit_files
 
+if get_option('rbmc-cfam-daemon').allowed()
+    unit_files += [
+        'service_files/xyz.openbmc_project.State.BMC.Redundancy.Sibling.service',
+    ]
+endif
+
 systemd_system_unit_dir = dependency('systemd').get_variable(
     'systemdsystemunitdir',
     pkgconfig_define: ['prefix', get_option('prefix')],
@@ -295,9 +309,13 @@ if not get_option('tests').disabled()
             'test/utest.cpp',
             'targeting.cpp',
             'filedescriptor.cpp',
-            dependencies: [gtest, dependency('phosphor-logging')],
+            dependencies: [gtest_dep, dependency('phosphor-logging')],
             implicit_include_directories: false,
             include_directories: '.',
         ),
     )
+endif
+
+if get_option('rbmc-cfam-daemon').allowed()
+    subdir('rbmc-cfam-daemon')
 endif

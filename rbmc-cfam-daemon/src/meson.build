@@ -1,0 +1,40 @@
+# SPDX-License-Identifier: Apache-2.0
+
+installdir = join_paths(get_option('libexecdir'), 'openpower-proc-control')
+
+ssl_dep = dependency('openssl')
+cfam_deps = [sdbusplus_dep, pdi_dep, phosphor_logging_dep, ssl_dep]
+
+sources = [
+    'application.cpp',
+    'cfam_access.cpp',
+    'cfam_fields.cpp',
+    'cfam_main.cpp',
+    'driver.cpp',
+    'local_bmc.cpp',
+    'local_cfam.cpp',
+    'paths.cpp',
+    'sibling_cfam.cpp',
+    'sibling_bmc.cpp',
+    'services.cpp',
+]
+
+executable(
+    'rbmc-cfamd',
+    sources,
+    dependencies: [cfam_deps],
+    install: true,
+    install_dir: installdir,
+)
+
+executable(
+    'cfamstool',
+    'cfam_access.cpp',
+    'cfam_fields.cpp',
+    'cfams_tool.cpp',
+    'driver.cpp',
+    'local_cfam.cpp',
+    'paths.cpp',
+    dependencies: [cfam_deps, cli11_dep],
+    install: true,
+)
