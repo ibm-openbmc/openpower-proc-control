@@ -106,6 +106,13 @@ class SiblingCFAM : public BMCCFAM
     bool getSiblingCommsOK() const;
 
     /**
+     * @brief Returns the failover imminent field
+     *
+     * Will throw if there is a hardware error
+     */
+    bool getFailoverImminent() const;
+
+    /**
      * @brief Returns the heartbeat field
      *
      * Will throw if there is a hardware error
@@ -157,6 +164,9 @@ class SiblingCFAM : public BMCCFAM
 
     /** @brief Latest sibling comms OK value */
     bool siblingCommsOK{};
+
+    /** @brief Latest failover imminent value */
+    bool failoverImminent{};
 
     /** @brief The set of scratchpad regs that contain field */
     std::set<cfam::ScratchPadReg> usedRegs;

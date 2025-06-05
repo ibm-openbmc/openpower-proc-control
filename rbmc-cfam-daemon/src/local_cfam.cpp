@@ -126,6 +126,17 @@ void LocalCFAM::writeSiblingCommsOK(bool ok)
     }
 }
 
+void LocalCFAM::writeFailoverImminent(bool imminent)
+{
+    auto rc = writeField(Field::failoverImminent, imminent);
+    if (rc != 0)
+    {
+        lg2::error("Failed writing Failover Imminent field {IMM} in local CFAM",
+                   "IMM", imminent);
+        throw std::system_error(rc, std::generic_category());
+    }
+}
+
 std::expected<uint32_t, int> LocalCFAM::readField(Field field)
 {
     auto data = cfamAccess.readScratchReg(cfamFields.at(field).reg);

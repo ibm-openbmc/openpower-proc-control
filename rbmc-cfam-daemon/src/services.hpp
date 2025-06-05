@@ -24,6 +24,7 @@ class Services
     using RoleCallback = std::function<void(Role)>;
     using RedEnabledCallback = std::function<void(bool)>;
     using FailoversAllowedCallback = std::function<void(bool)>;
+    using FailoverImminentCallback = std::function<void(bool)>;
 
     Services() = delete;
     ~Services() = default;
@@ -44,11 +45,14 @@ class Services
      *                                 redundancyEnabled prop changes
      * @param[in] failoversAllowedCallback - Function to run when this prop
      *                                      changes
+     * @param[in] failoverImminentCallback - Function to run when this
+     *                                         prop changes
      */
     Services(sdbusplus::async::context& ctx, BMCStateCallback&& stateCallback,
              RoleCallback&& roleCallback,
              RedEnabledCallback&& redEnabledCallback,
-             FailoversAllowedCallback&& failoversAllowedCallback);
+             FailoversAllowedCallback&& failoversAllowedCallback,
+             FailoverImminentCallback&& failoverImminentCallback);
 
     /**
      * @brief Reads the CurrentBMCState property
@@ -60,9 +64,10 @@ class Services
     /**
      * @brief Reads the role and redundancyEnabled properties
      *
-     * @return - A tuple of the role and redundancyEnabled property
+     * @return - A tuple of role, redundancyEnabled, FailoversAllowed
+     *           FailoverImminent
      */
-    sdbusplus::async::task<std::tuple<Services::Role, bool, bool>>
+    sdbusplus::async::task<std::tuple<Services::Role, bool, bool, bool>>
         getRedundancyProps();
 
     /**
@@ -138,6 +143,11 @@ class Services
      * @brief The callback function for FailoversAllowed
      */
     FailoversAllowedCallback failoversAllowedCallback;
+
+    /**
+     * @brief The callback function for FailoverImminent
+     */
+    FailoverImminentCallback failoverImminentCallback;
 
     /**
      * @brief Object path for this BMC's redundancy and state interfaces.

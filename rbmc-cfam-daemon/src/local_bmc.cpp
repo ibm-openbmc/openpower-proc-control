@@ -22,7 +22,8 @@ sdbusplus::async::task<> LocalBMC::start()
         ctx, [this](auto state) { bmcStateChanged(state); },
         [this](auto role) { roleChanged(role); },
         [this](auto enabled) { redEnabledChanged(enabled); },
-        [this](auto allowed) { failoversAllowedChanged(allowed); });
+        [this](auto allowed) { failoversAllowedChanged(allowed); },
+        [this](auto imminent) { failoverImminentChanged(imminent); });
 
     co_await writeRedundancyProps();
     co_await writeBMCState();
@@ -122,18 +123,28 @@ void LocalBMC::failoversAllowedChanged(bool allowed)
     cfam.writeFailoversAllowed(allowed);
 }
 
+void LocalBMC::failoverImminentChanged(bool imminent)
+{
+    lg2::info("Local Failover Imminent changed to {IMMINENT}", "IMMINENT",
+              imminent);
+    cfam.writeFailoverImminent(imminent);
+}
+
 sdbusplus::async::task<> LocalBMC::writeRedundancyProps()
 {
     try
     {
-        auto [role, enabled, allowed] = co_await services->getRedundancyProps();
+        auto [role, enabled, allowed,
+              imminent] = co_await services->getRedundancyProps();
         lg2::info(
-            "Initial values of local role, redEnabled, fo allowed: {ROLE} {ENABLED} {ALLOWED}",
-            "ROLE", role, "ENABLED", enabled, "ALLOWED", allowed);
+            "Initial values of local role, redEnabled, fo allowed, fo imminent: {ROLE} {ENABLED} {ALLOWED} {IMMINENT}",
+            "ROLE", role, "ENABLED", enabled, "ALLOWED", allowed, "IMMINENT",
+            imminent);
 
         cfam.writeRole(role);
         cfam.writeRedundancyEnabled(enabled);
         cfam.writeFailoversAllowed(allowed);
+        cfam.writeFailoverImminent(imminent);
     }
     catch (const sdbusplus::exception_t& e)
     {

@@ -71,6 +71,7 @@ void SiblingBMC::read()
                                      createdObject);
     siblingObject->failoversAllowed(cfam.getFailoversAllowed(), createdObject);
     siblingObject->currentBMCState(cfam.getBMCState(), createdObject);
+    siblingObject->failoverImminent(cfam.getFailoverImminent(), createdObject);
 
     auto version = std::format("{:08X}", cfam.getFWVersion());
     siblingObject->version(version, createdObject);

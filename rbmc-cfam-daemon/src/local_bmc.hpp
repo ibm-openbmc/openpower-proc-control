@@ -139,6 +139,17 @@ class LocalBMC
     void failoversAllowedChanged(bool allowed);
 
     /**
+     * @brief Callback function for when the failover
+     * imminent D-Bus property changes.
+     *
+     * Writes the new value into the CFAM in the
+     * FailoverImminent field.
+     *
+     * @param[in] imminent - the value to write
+     */
+    void failoverImminentChanged(bool imminent);
+
+    /**
      * @brief The context object
      */
     sdbusplus::async::context& ctx;

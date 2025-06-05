@@ -29,7 +29,8 @@ The `rbmc-cfam-daemon` meson option will enable building this code.
 | Provisioned       | 1        | 13        | 1      |
 | BMC State         | 1        | 14        | 3      |
 | Sibling Comms OK  | 1        | 17        | 1      |
-| Reserved          | 1        | 18        | 6      |
+| Failover Imminent | 1        | 18        | 1      |
+| Reserved          | 1        | 19        | 5      |
 | Heartbeat         | 1        | 24        | 8      |
 | FW Version        | 2        | 0         | 32     |
 | Reserved          | 3        | 0         | 32     |
@@ -58,6 +59,9 @@ property from the BMC state daemon.
 
 **Sibling Comms OK**: If this BMC can read the sibling BMC's CFAM.
 
+**Failover Imminent**: If the sibling will start a failover soon. Only the
+passive BMC will set this, soon before it starts a failover to become active.
+
 **Heartbeat**: This field is incremented by one every time the CFAM application
 receives the Heartbeat signal from the RBMC state manager application. This can
 be used by the sibling to know the management daemon is alive.
@@ -80,6 +84,7 @@ Failovers Allowed          true
 Provisioned                true
 BMC State                  xyz.openbmc_project.State.BMC.BMCState.Ready
 Sibling Communication OK   true
+Failover Imminent          false
 Heartbeat                  0x25
 FW Version                 0x1c9c4045
 
@@ -92,6 +97,7 @@ Failovers Allowed          true
 Provisioned                true
 BMC State                  xyz.openbmc_project.State.BMC.BMCState.Ready
 Sibling Communication OK   true
+Failover Imminent          false
 Heartbeat                  0x24
 FW Version                 0x1c9c4045
 ```

@@ -39,6 +39,9 @@ void SiblingCFAM::readAll()
 
     siblingCommsOK =
         cfam::getFieldValue(*regs, cfamFields.at(Field::siblingCommsOK));
+
+    failoverImminent =
+        cfam::getFieldValue(*regs, cfamFields.at(Field::failoverImminent));
 }
 
 uint8_t SiblingCFAM::getApiVersion() const
@@ -120,6 +123,15 @@ bool SiblingCFAM::getSiblingCommsOK() const
         throw std::runtime_error{"CFAM fields not available"};
     }
     return siblingCommsOK;
+}
+
+bool SiblingCFAM::getFailoverImminent() const
+{
+    if (error)
+    {
+        throw std::runtime_error{"CFAM fields not available"};
+    }
+    return failoverImminent;
 }
 
 uint32_t SiblingCFAM::getHeartbeat() const
