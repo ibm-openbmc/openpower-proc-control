@@ -14,6 +14,7 @@
 namespace state_ns = sdbusplus::common::xyz::openbmc_project::state;
 namespace bmc_ns = sdbusplus::common::xyz::openbmc_project::state::bmc;
 namespace rules = sdbusplus::bus::match::rules;
+using RedNSPath = bmc_ns::Redundancy::namespace_path;
 
 namespace util
 {
@@ -43,8 +44,11 @@ Services::Services(sdbusplus::async::context& ctx,
                    RedEnabledCallback&& redEnabledCallback,
                    FailoversAllowedCallback&& failoversAllowedCallback) :
     ctx(ctx), bmcStateCallback(std::move(stateCallback)),
-    roleCallback(roleCallback), redEnabledCallback(redEnabledCallback),
-    failoversAllowedCallback(failoversAllowedCallback)
+    roleCallback(std::move(roleCallback)),
+    redEnabledCallback(std::move(redEnabledCallback)),
+    failoversAllowedCallback(std::move(failoversAllowedCallback)),
+    localBMCPath(
+        sdbusplus::message::object_path{RedNSPath::value} / RedNSPath::bmc)
 {
     startup();
 }
@@ -133,46 +137,38 @@ uint32_t Services::getBMCPosition()
 
 sdbusplus::async::task<Services::BMCState> Services::getBMCState()
 {
-    using np = state_ns::BMC::namespace_path;
-    std::string objectPath =
-        sdbusplus::message::object_path(np::value) / np::bmc;
-
     auto service =
-        co_await util::getService(ctx, objectPath, state_ns::BMC::interface);
+        co_await util::getService(ctx, localBMCPath, state_ns::BMC::interface);
 
     using StateMgr = sdbusplus::client::xyz::openbmc_project::state::BMC<>;
-    auto stateMgr = StateMgr(ctx).service(service).path(objectPath);
-    co_return co_await stateMgr.current_bmc_state();
+    co_return co_await StateMgr(ctx)
+        .service(service)
+        .path(localBMCPath)
+        .current_bmc_state();
 }
 
 sdbusplus::async::task<std::tuple<Services::Role, bool, bool>>
     Services::getRedundancyProps()
 {
-    auto service = co_await util::getService(
-        ctx, bmc_ns::Redundancy::instance_path, bmc_ns::Redundancy::interface);
+    auto service = co_await util::getService(ctx, localBMCPath,
+                                             bmc_ns::Redundancy::interface);
 
-    auto rbmcMgr = sdbusplus::async::proxy()
-                       .service(service)
-                       .path(bmc_ns::Redundancy::instance_path)
-                       .interface(bmc_ns::Redundancy::interface);
+    using Redundancy =
+        sdbusplus::client::xyz::openbmc_project::state::bmc::Redundancy<>;
 
-    auto props =
-        co_await rbmcMgr
-            .get_all_properties<bmc_ns::Redundancy::PropertiesVariant>(ctx);
-    auto role = std::get<Role>(props.at("Role"));
-    auto enabled = std::get<bool>(props.at("RedundancyEnabled"));
-    auto allowed = std::get<bool>(props.at("FailoversAllowed"));
-    co_return std::make_tuple(role, enabled, allowed);
+    auto props = co_await Redundancy(ctx)
+                     .service(service)
+                     .path(localBMCPath)
+                     .properties();
+
+    co_return std::make_tuple(props.role, props.redundancy_enabled,
+                              props.failovers_allowed);
 }
 
 sdbusplus::async::task<> Services::watchBMCStateProp()
 {
-    using np = state_ns::BMC::namespace_path;
-    std::string objectPath =
-        sdbusplus::message::object_path(np::value) / np::bmc;
-
     sdbusplus::async::match match(
-        ctx, rules::propertiesChanged(objectPath, state_ns::BMC::interface));
+        ctx, rules::propertiesChanged(localBMCPath, state_ns::BMC::interface));
 
     using PropertyMap = std::map<std::string, state_ns::BMC::PropertiesVariant>;
 
@@ -187,14 +183,13 @@ sdbusplus::async::task<> Services::watchBMCStateProp()
             bmcStateCallback(std::get<BMCState>(it->second));
         }
     }
-    co_return;
 }
 
 sdbusplus::async::task<> Services::watchRedundancyProps()
 {
     sdbusplus::async::match match(
-        ctx, rules::propertiesChanged(bmc_ns::Redundancy::instance_path,
-                                      bmc_ns::Redundancy::interface));
+        ctx,
+        rules::propertiesChanged(localBMCPath, bmc_ns::Redundancy::interface));
 
     using PropertyMap =
         std::map<std::string, bmc_ns::Redundancy::PropertiesVariant>;
@@ -222,19 +217,13 @@ sdbusplus::async::task<> Services::watchRedundancyProps()
             failoversAllowedCallback(std::get<bool>(it->second));
         }
     }
-    co_return;
 }
 
 sdbusplus::async::task<> Services::watchBMCInterfaceAdded()
 {
-    namespace rules = sdbusplus::bus::match::rules;
-    using np = state_ns::BMC::namespace_path;
-    std::string objectPath =
-        sdbusplus::message::object_path(np::value) / np::bmc;
-
     // Note: BMC State and Redundancy are on the same object path
     sdbusplus::async::match match(ctx,
-                                  rules::interfacesAddedAtPath(objectPath));
+                                  rules::interfacesAddedAtPath(localBMCPath));
 
     using PropertiesVariant = std::variant<std::string, state_ns::BMC::BMCState,
                                            bmc_ns::Redundancy::Role, bool>;
@@ -282,6 +271,4 @@ sdbusplus::async::task<> Services::watchBMCInterfaceAdded()
             }
         }
     }
-
-    co_return;
 }

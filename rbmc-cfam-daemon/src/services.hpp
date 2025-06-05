@@ -138,4 +138,9 @@ class Services
      * @brief The callback function for FailoversAllowed
      */
     FailoversAllowedCallback failoversAllowedCallback;
+
+    /**
+     * @brief Object path for this BMC's redundancy and state interfaces.
+     */
+    std::string localBMCPath;
 };
