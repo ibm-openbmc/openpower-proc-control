@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 #pragma once
 #include "sibling_cfam.hpp"
+#include "sibling_object.hpp"
 
 #include <sdbusplus/async.hpp>
 #include <xyz/openbmc_project/State/BMC/Redundancy/Sibling/server.hpp>
@@ -24,7 +25,6 @@ class SiblingBMC
     using BMCState =
         sdbusplus::common::xyz::openbmc_project::state::BMC::BMCState;
 
-    SiblingBMC() = delete;
     ~SiblingBMC() = default;
     SiblingBMC(const SiblingBMC&) = delete;
     SiblingBMC& operator=(const SiblingBMC&) = delete;
@@ -75,6 +75,11 @@ class SiblingBMC
      * @brief The Sibling D-Bus interface
      */
     std::unique_ptr<SiblingInterface> siblingInterface;
+
+    /**
+     * @brief The Sibling D-Bus object
+     */
+    std::unique_ptr<SiblingObject> siblingObject;
 
     /**
      * @brief The last heartbeat value read from the CFAM.

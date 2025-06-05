@@ -7,7 +7,7 @@
 
 void SiblingBMC::read()
 {
-    bool createdIface = false;
+    bool createdObject = false;
 
     if (!cfam.isReady())
     {
@@ -17,10 +17,12 @@ void SiblingBMC::read()
             ready = false;
         }
 
-        if (siblingInterface)
+        if (siblingObject)
         {
             lg2::info(
-                "Removing sibling interface from D-Bus due to CFAM not ready");
+                "Removing sibling object from D-Bus due to CFAM not ready");
+            siblingObject.reset();
+
             siblingInterface.reset();
         }
         return;
@@ -36,52 +38,71 @@ void SiblingBMC::read()
 
     if (cfam.hasError())
     {
-        if (siblingInterface)
+        if (siblingObject)
         {
-            lg2::info("Removing sibling API from D-Bus due to CFAM error");
+            lg2::info("Removing sibling object from D-Bus due to CFAM error");
+            siblingObject.reset();
+
             siblingInterface.reset();
         }
         return;
     }
 
-    if (!siblingInterface)
+    if (!siblingObject)
     {
-        lg2::info("Creating Sibling D-Bus interface");
+        lg2::info("Creating Sibling D-Bus interfaces");
 
         auto objectPath =
-            sdbusplus::message::object_path{
-                SiblingInterface::namespace_path::value} /
-            SiblingInterface::namespace_path::bmc;
+            sdbusplus::message::object_path{RedIntf::namespace_path::value} /
+            RedIntf::namespace_path::sibling_bmc;
+
+        siblingObject =
+            std::make_unique<SiblingObject>(ctx.get_bus(), objectPath.str);
 
         siblingInterface = std::make_unique<SiblingInterface>(
             ctx.get_bus(), objectPath.str.c_str(),
             SiblingInterface::action::defer_emit);
 
-        createdIface = true;
+        createdObject = true;
     }
 
-    siblingInterface->communicationOK(cfam.getSiblingCommsOK(), createdIface);
-    siblingInterface->bmcPosition(cfam.getBMCPosition(), createdIface);
-    siblingInterface->provisioned(cfam.getProvisioned(), createdIface);
-    siblingInterface->role(cfam.getRole(), createdIface);
-    siblingInterface->redundancyEnabled(cfam.getRedundancyEnabled(),
-                                        createdIface);
-    siblingInterface->failoversAllowed(cfam.getFailoversAllowed(),
-                                       createdIface);
-    siblingInterface->bmcState(cfam.getBMCState(), createdIface);
+    siblingObject->role(cfam.getRole(), createdObject);
+    siblingObject->redundancyEnabled(cfam.getRedundancyEnabled(),
+                                     createdObject);
+    siblingObject->failoversAllowed(cfam.getFailoversAllowed(), createdObject);
+    siblingObject->currentBMCState(cfam.getBMCState(), createdObject);
 
     auto version = std::format("{:X}", cfam.getFWVersion());
-    siblingInterface->fwVersion(version, createdIface);
+    siblingObject->version(version, createdObject);
 
     // Must detect a heartbeat change to consider it active, so it won't
     // be active until at least the second time though.
     auto heartbeat = cfam.getHeartbeat();
     auto alive = lastHeartbeat.has_value() &&
                  (heartbeat != lastHeartbeat.value());
-    siblingInterface->heartbeat(alive, createdIface);
+    siblingObject->active(alive, createdObject);
     lastHeartbeat = heartbeat;
 
-    if (createdIface)
+    if (createdObject)
+    {
+        siblingObject->emit_object_added();
+    }
+
+    siblingInterface->communicationOK(cfam.getSiblingCommsOK(), createdObject);
+    siblingInterface->bmcPosition(cfam.getBMCPosition(), createdObject);
+    siblingInterface->provisioned(cfam.getProvisioned(), createdObject);
+    siblingInterface->role(cfam.getRole(), createdObject);
+    siblingInterface->redundancyEnabled(cfam.getRedundancyEnabled(),
+                                        createdObject);
+    siblingInterface->failoversAllowed(cfam.getFailoversAllowed(),
+                                       createdObject);
+    siblingInterface->bmcState(cfam.getBMCState(), createdObject);
+
+    siblingInterface->fwVersion(version, createdObject);
+
+    siblingInterface->heartbeat(alive, createdObject);
+
+    if (createdObject)
     {
         siblingInterface->emit_object_added();
     }
