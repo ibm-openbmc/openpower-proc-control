@@ -34,7 +34,7 @@ TEST_F(SiblingCFAMTest, TestReads)
     EXPECT_EQ(sibling.getBMCPosition(), 1);
     EXPECT_EQ(sibling.getProvisioned(), true);
     EXPECT_EQ(sibling.getRedundancyEnabled(), true);
-    EXPECT_EQ(sibling.getFailoversPaused(), true);
+    EXPECT_EQ(sibling.getFailoversAllowed(), true);
     EXPECT_EQ(sibling.getBMCState(), SiblingCFAM::BMCState::Quiesced);
     EXPECT_EQ(sibling.getRole(), SiblingCFAM::Role::Passive);
     EXPECT_EQ(sibling.getSiblingCommsOK(), true);
@@ -60,7 +60,7 @@ TEST_F(SiblingCFAMTest, TestReadFail)
     EXPECT_THROW(sibling.getBMCPosition(), std::runtime_error);
     EXPECT_THROW(sibling.getProvisioned(), std::runtime_error);
     EXPECT_THROW(sibling.getRedundancyEnabled(), std::runtime_error);
-    EXPECT_THROW(sibling.getFailoversPaused(), std::runtime_error);
+    EXPECT_THROW(sibling.getFailoversAllowed(), std::runtime_error);
     EXPECT_THROW(sibling.getBMCState(), std::runtime_error);
     EXPECT_THROW(sibling.getRole(), std::runtime_error);
     EXPECT_THROW(sibling.getSiblingCommsOK(), std::runtime_error);

@@ -83,13 +83,13 @@ void LocalCFAM::writeRedundancyEnabled(bool enabled)
     }
 }
 
-void LocalCFAM::writeFailoversPaused(bool paused)
+void LocalCFAM::writeFailoversAllowed(bool allowed)
 {
-    auto rc = writeField(Field::failoversPaused, paused);
+    auto rc = writeField(Field::failoversAllowed, allowed);
     if (rc != 0)
     {
-        lg2::error("Failed writing failovers paused {PAUSED} in local CFAM",
-                   "PAUSED", paused);
+        lg2::error("Failed writing failovers allowed {ALLOWED} in local CFAM",
+                   "ALLOWED", allowed);
         throw std::system_error(rc, std::generic_category());
     }
 }

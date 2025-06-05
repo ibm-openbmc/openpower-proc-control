@@ -93,11 +93,11 @@ class LocalCFAM : public BMCCFAM
     void writeRedundancyEnabled(bool enabled);
 
     /**
-     * @brief Writes the failovers paused field into the CFAM
+     * @brief Writes the failovers allowed field into the CFAM
      *
-     * @param[in] paused - If paused
+     * @param[in] allowed - If allowed
      */
-    void writeFailoversPaused(bool paused);
+    void writeFailoversAllowed(bool allowed);
 
     /**
      * @brief Writes the role field into the CFAM

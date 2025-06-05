@@ -41,10 +41,10 @@ Services::Services(sdbusplus::async::context& ctx,
                    BMCStateCallback&& stateCallback,
                    RoleCallback&& roleCallback,
                    RedEnabledCallback&& redEnabledCallback,
-                   FailoversPausedCallback&& failoversPausedCallback) :
+                   FailoversAllowedCallback&& failoversAllowedCallback) :
     ctx(ctx), bmcStateCallback(std::move(stateCallback)),
     roleCallback(roleCallback), redEnabledCallback(redEnabledCallback),
-    failoversPausedCallback(failoversPausedCallback)
+    failoversAllowedCallback(failoversAllowedCallback)
 {
     startup();
 }
@@ -161,8 +161,8 @@ sdbusplus::async::task<std::tuple<Services::Role, bool, bool>>
             .get_all_properties<bmc_ns::Redundancy::PropertiesVariant>(ctx);
     auto role = std::get<Role>(props.at("Role"));
     auto enabled = std::get<bool>(props.at("RedundancyEnabled"));
-    auto paused = std::get<bool>(props.at("FailoversPaused"));
-    co_return std::make_tuple(role, enabled, paused);
+    auto allowed = std::get<bool>(props.at("FailoversAllowed"));
+    co_return std::make_tuple(role, enabled, allowed);
 }
 
 sdbusplus::async::task<> Services::watchBMCStateProp()
@@ -216,10 +216,10 @@ sdbusplus::async::task<> Services::watchRedundancyProps()
             redEnabledCallback(std::get<bool>(it->second));
         }
 
-        it = propertyMap.find("FailoversPaused");
+        it = propertyMap.find("FailoversAllowed");
         if (it != propertyMap.end())
         {
-            failoversPausedCallback(std::get<bool>(it->second));
+            failoversAllowedCallback(std::get<bool>(it->second));
         }
     }
     co_return;
@@ -275,10 +275,10 @@ sdbusplus::async::task<> Services::watchBMCInterfaceAdded()
                 redEnabledCallback(std::get<bool>(propIt->second));
             }
 
-            propIt = props.find("FailoversPaused");
+            propIt = props.find("FailoversAllowed");
             if (propIt != props.end())
             {
-                failoversPausedCallback(std::get<bool>(propIt->second));
+                failoversAllowedCallback(std::get<bool>(propIt->second));
             }
         }
     }

@@ -22,7 +22,7 @@ sdbusplus::async::task<> LocalBMC::start()
         ctx, [this](auto state) { bmcStateChanged(state); },
         [this](auto role) { roleChanged(role); },
         [this](auto enabled) { redEnabledChanged(enabled); },
-        [this](auto paused) { failoversPausedChanged(paused); });
+        [this](auto allowed) { failoversAllowedChanged(allowed); });
 
     co_await writeRedundancyProps();
     co_await writeBMCState();
@@ -115,24 +115,25 @@ void LocalBMC::redEnabledChanged(bool enabled)
     cfam.writeRedundancyEnabled(enabled);
 }
 
-void LocalBMC::failoversPausedChanged(bool paused)
+void LocalBMC::failoversAllowedChanged(bool allowed)
 {
-    lg2::info("Local Failovers Paused changed to {PAUSED}", "PAUSED", paused);
-    cfam.writeFailoversPaused(paused);
+    lg2::info("Local Failovers Allowed changed to {ALLOWED}", "ALLOWED",
+              allowed);
+    cfam.writeFailoversAllowed(allowed);
 }
 
 sdbusplus::async::task<> LocalBMC::writeRedundancyProps()
 {
     try
     {
-        auto [role, enabled, paused] = co_await services->getRedundancyProps();
+        auto [role, enabled, allowed] = co_await services->getRedundancyProps();
         lg2::info(
-            "Initial values of local role, redEnabled, fo paused: {ROLE} {ENABLED} {PAUSED}",
-            "ROLE", role, "ENABLED", enabled, "PAUSED", paused);
+            "Initial values of local role, redEnabled, fo allowed: {ROLE} {ENABLED} {ALLOWED}",
+            "ROLE", role, "ENABLED", enabled, "ALLOWED", allowed);
 
         cfam.writeRole(role);
         cfam.writeRedundancyEnabled(enabled);
-        cfam.writeFailoversPaused(paused);
+        cfam.writeFailoversAllowed(allowed);
     }
     catch (const sdbusplus::exception_t& e)
     {

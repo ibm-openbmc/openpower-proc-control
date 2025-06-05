@@ -66,7 +66,8 @@ void SiblingBMC::read()
     siblingInterface->role(cfam.getRole(), createdIface);
     siblingInterface->redundancyEnabled(cfam.getRedundancyEnabled(),
                                         createdIface);
-    siblingInterface->failoversPaused(cfam.getFailoversPaused(), createdIface);
+    siblingInterface->failoversAllowed(cfam.getFailoversAllowed(),
+                                       createdIface);
     siblingInterface->bmcState(cfam.getBMCState(), createdIface);
 
     auto version = std::format("{:X}", cfam.getFWVersion());

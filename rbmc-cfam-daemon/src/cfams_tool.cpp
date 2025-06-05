@@ -26,7 +26,7 @@ std::string formatValue(BMCCFAM::Field field, uint32_t value)
             result = std::format("{:#x}", value);
             break;
         case redundancyEnabled:
-        case failoversPaused:
+        case failoversAllowed:
         case provisioned:
         case siblingCommsOK:
             result = std::format("{}", value ? "true" : "false");

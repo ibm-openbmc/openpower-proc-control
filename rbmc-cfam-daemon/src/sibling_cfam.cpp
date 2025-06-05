@@ -28,8 +28,8 @@ void SiblingCFAM::readAll()
     redundancyEnabled =
         cfam::getFieldValue(*regs, cfamFields.at(Field::redundancyEnabled));
 
-    failoversPaused =
-        cfam::getFieldValue(*regs, cfamFields.at(Field::failoversPaused));
+    failoversAllowed =
+        cfam::getFieldValue(*regs, cfamFields.at(Field::failoversAllowed));
 
     auto r = cfam::getFieldValue(*regs, cfamFields.at(Field::role));
     role = static_cast<Role>(r);
@@ -86,13 +86,13 @@ bool SiblingCFAM::getRedundancyEnabled() const
     return redundancyEnabled;
 }
 
-bool SiblingCFAM::getFailoversPaused() const
+bool SiblingCFAM::getFailoversAllowed() const
 {
     if (error)
     {
         throw std::runtime_error{"CFAM fields not available"};
     }
-    return failoversPaused;
+    return failoversAllowed;
 }
 
 SiblingCFAM::BMCState SiblingCFAM::getBMCState() const

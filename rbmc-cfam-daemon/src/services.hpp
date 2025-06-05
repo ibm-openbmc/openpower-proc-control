@@ -23,7 +23,7 @@ class Services
     using BMCStateCallback = std::function<void(BMCState)>;
     using RoleCallback = std::function<void(Role)>;
     using RedEnabledCallback = std::function<void(bool)>;
-    using FailoversPausedCallback = std::function<void(bool)>;
+    using FailoversAllowedCallback = std::function<void(bool)>;
 
     Services() = delete;
     ~Services() = default;
@@ -42,13 +42,13 @@ class Services
      * @param[in] roleCallback - Function to run when the role changes
      * @param[in] redEnabledCallback - Function to run when the
      *                                 redundancyEnabled prop changes
-     * @param[in] failoversPausedCallback - Function to run when this prop
+     * @param[in] failoversAllowedCallback - Function to run when this prop
      *                                      changes
      */
     Services(sdbusplus::async::context& ctx, BMCStateCallback&& stateCallback,
              RoleCallback&& roleCallback,
              RedEnabledCallback&& redEnabledCallback,
-             FailoversPausedCallback&& failoversPausedCallback);
+             FailoversAllowedCallback&& failoversAllowedCallback);
 
     /**
      * @brief Reads the CurrentBMCState property
@@ -135,7 +135,7 @@ class Services
     RedEnabledCallback redEnabledCallback;
 
     /**
-     * @brief The callback function for FailoversPaused
+     * @brief The callback function for FailoversAllowed
      */
-    FailoversPausedCallback failoversPausedCallback;
+    FailoversAllowedCallback failoversAllowedCallback;
 };

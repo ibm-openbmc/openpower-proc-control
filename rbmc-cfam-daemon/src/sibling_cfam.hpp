@@ -78,11 +78,11 @@ class SiblingCFAM : public BMCCFAM
     bool getRedundancyEnabled() const;
 
     /**
-     * @brief Returns the failovers paused field
+     * @brief Returns the failovers allowed field
      *
      * Will throw if there is a hardware error
      */
-    bool getFailoversPaused() const;
+    bool getFailoversAllowed() const;
 
     /**
      * @brief Returns the BMC state field
@@ -146,8 +146,8 @@ class SiblingCFAM : public BMCCFAM
     /** @brief Latest redundancy enabled value */
     bool redundancyEnabled{};
 
-    /** @brief Latest failovers paused value */
-    bool failoversPaused{};
+    /** @brief Latest failovers allowed value */
+    bool failoversAllowed{};
 
     /** @brief Latest BMC state value */
     BMCState bmcState;

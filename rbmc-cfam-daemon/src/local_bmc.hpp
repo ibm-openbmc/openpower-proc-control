@@ -129,14 +129,14 @@ class LocalBMC
     void redEnabledChanged(bool enabled);
 
     /**
-     * @brief Callback function for when the failovers paused
+     * @brief Callback function for when the failovers allowed
      * D-Bus property changes.
      *
      * Writes the new value into the CFAM.
      *
-     * @param[in] paused - Value to write
+     * @param[in] allowed - Value to write
      */
-    void failoversPausedChanged(bool paused);
+    void failoversAllowedChanged(bool allowed);
 
     /**
      * @brief The context object

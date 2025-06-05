@@ -63,7 +63,7 @@ TEST_F(LocalCFAMTest, TestWriteRedundancyEnabled)
     cfam.writeRedundancyEnabled(true);
 }
 
-TEST_F(LocalCFAMTest, TestWriteFailoversPaused)
+TEST_F(LocalCFAMTest, TestWriteFailoversAllowed)
 {
     MockDriver driver;
     LocalCFAM cfam{0, driver};
@@ -71,7 +71,7 @@ TEST_F(LocalCFAMTest, TestWriteFailoversPaused)
     EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00080000, 0x00080000))
         .WillOnce(Return(0));
 
-    cfam.writeFailoversPaused(true);
+    cfam.writeFailoversAllowed(true);
 }
 TEST_F(LocalCFAMTest, TestWriteProvisioned)
 {
@@ -149,7 +149,7 @@ TEST_F(LocalCFAMTest, TestWriteFails)
     EXPECT_THROW(cfam.writeApiVersion(0xFF), std::system_error);
     EXPECT_THROW(cfam.writeRole(LocalCFAM::Role::Passive), std::system_error);
     EXPECT_THROW(cfam.writeRedundancyEnabled(true), std::system_error);
-    EXPECT_THROW(cfam.writeFailoversPaused(true), std::system_error);
+    EXPECT_THROW(cfam.writeFailoversAllowed(true), std::system_error);
     EXPECT_THROW(cfam.writeProvisioned(true), std::system_error);
     EXPECT_THROW(cfam.writeBMCState(LocalCFAM::BMCState::Quiesced),
                  std::system_error);
