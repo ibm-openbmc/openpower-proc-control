@@ -34,6 +34,7 @@ class BMCCFAM
         provisioned,
         bmcState,
         siblingCommsOK,
+        failoverImminent,
         heartbeat,
         fwVersion
     };
@@ -53,6 +54,8 @@ class BMCCFAM
         {Field::bmcState, {cfam::ScratchPadReg::one, 14, 3, "BMC State"}},
         {Field::siblingCommsOK,
          {cfam::ScratchPadReg::one, 17, 1, "Sibling Communication OK"}},
+        {Field::failoverImminent,
+         {cfam::ScratchPadReg::one, 18, 1, "Failover Imminent"}},
         {Field::heartbeat, {cfam::ScratchPadReg::one, 24, 8, "Heartbeat"}},
         {Field::fwVersion, {cfam::ScratchPadReg::two, 0, 32, "FW Version"}}};
 

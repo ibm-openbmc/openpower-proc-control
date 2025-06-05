@@ -121,6 +121,13 @@ class LocalCFAM : public BMCCFAM
     void writeSiblingCommsOK(bool ok);
 
     /**
+     * @brief Writes the failover imminent field into the CFAM
+     *
+     * @param[in] imminent - If a failover is imminent
+     */
+    void writeFailoverImminent(bool imminent);
+
+    /**
      * @brief Increments the heartbeat field in the CFAM
      */
     void incHeartbeat();
