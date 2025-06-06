@@ -12,6 +12,7 @@ extern "C"
 #include <attributes_info.H>
 #include <libekb.H>
 #include <libphal.H>
+#include <errl_factory.H>
 
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/elog.hpp>
@@ -888,19 +889,22 @@ void processSbeBootError()
         procTarget = nullptr;
     }
     // check valid primary processor is available
+    uint32_t logId = 0;
     if (procTarget == nullptr)
     {
         log<level::ERR>("processSbeBootError: fail to get primary processor");
-        // Add BMC code callout and create PEL
-        json jsonCalloutDataList;
-        jsonCalloutDataList = json::array();
-        json jsonCalloutData;
-        jsonCalloutData["Procedure"] = "BMC0001";
-        jsonCalloutData["Priority"] = "H";
-        jsonCalloutDataList.emplace_back(jsonCalloutData);
-        openpower::pel::createErrorPEL(
-            "org.open_power.Processor.Error.SbeBootFailure",
-            jsonCalloutDataList, {}, Severity::Error);
+        auto errlHandle = errl::factory::createSbeNoFuncProc();
+        if (errlHandle && *errlHandle)
+        {
+            const auto& entries = (*errlHandle)->getEntries();
+            for (const auto& entryPtr : entries)
+            {
+                if (entryPtr)
+                {
+                    logId = openpower::pel::createPstSbeErrorPEL(entryPtr.get());
+                }
+            }
+        }
         return;
     }
     // SBE error object.
@@ -910,7 +914,18 @@ void processSbeBootError()
     try
     {
         // Capture FFDC information on primary processor
-        sbeError = captureFFDC(procTarget);
+        auto errlHandle = errl::factory::createSbeBootFailure(procTarget);
+        if (errlHandle && *errlHandle)
+        {
+            const auto& entries = (*errlHandle)->getEntries();
+            for (const auto& entryPtr : entries)
+            {
+                if (entryPtr)
+                {
+                    logId = openpower::pel::createPstSbeErrorPEL(entryPtr.get());
+                }
+            }
+        }
     }
     catch (const phalError_t& phalError)
     {
@@ -933,16 +948,10 @@ void processSbeBootError()
     {
         event = "org.open_power.Processor.Error.SbeBootFailure";
     }
-    // SRC6 : [0:15] chip position
-    uint32_t index = pdbg_target_index(procTarget);
-    pelAdditionalData.emplace_back("SRC6", std::to_string(index << 16));
-    // Create SBE Error with FFDC data.
-    auto logId =
-        createSbeErrorPEL(event, sbeError, pelAdditionalData, procTarget);
-
     if (dumpIsRequired)
     {
         using namespace openpower::phal::dump;
+        uint32_t index = pdbg_target_index(procTarget);
         DumpParameters dumpParameters = {logId, index, SBE_DUMP_TIMEOUT,
                                          DumpType::SBE};
         try
