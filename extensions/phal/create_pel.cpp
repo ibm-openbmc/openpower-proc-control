@@ -8,7 +8,7 @@
 #include <libekb.H>
 #include <libphal.H>
 #include <unistd.h>
-
+#include <errl_factory.H>
 #include <phosphor-logging/elog.hpp>
 #include <xyz/openbmc_project/Logging/Create/server.hpp>
 #include <xyz/openbmc_project/Logging/Entry/server.hpp>
@@ -34,7 +34,12 @@ namespace pel
 constexpr auto loggingObjectPath = "/xyz/openbmc_project/logging";
 constexpr auto loggingInterface = "xyz.openbmc_project.Logging.Create";
 constexpr auto opLoggingInterface = "org.open_power.Logging.PEL";
+using Severity = sdbusplus::xyz::openbmc_project::Logging::server::Entry::Level;
+namespace sdbus = sdbusplus::common::xyz::openbmc_project::logging;
 
+using FFDCInfo = std::vector<std::tuple<
+    sdbusplus::xyz::openbmc_project::Logging::server::Create::FFDCFormat,
+    uint8_t, uint8_t, sdbusplus::message::unix_fd>>;
 /**
  * @brief get SBE special callout information
  *
@@ -93,10 +98,7 @@ void createErrorPEL(const std::string& event, const json& calloutData,
     {
         FFDCFile ffdcFile(calloutData);
 
-        std::vector<std::tuple<sdbusplus::xyz::openbmc_project::Logging::
-                                   server::Create::FFDCFormat,
-                               uint8_t, uint8_t, sdbusplus::message::unix_fd>>
-            pelCalloutInfo;
+        FFDCInfo pelCalloutInfo;
 
         pelCalloutInfo.push_back(
             std::make_tuple(sdbusplus::xyz::openbmc_project::Logging::server::
@@ -148,10 +150,7 @@ uint32_t createSbeErrorPEL(const std::string& event, const sbeError_t& sbeError,
         additionalData.emplace(data);
     }
 
-    std::vector<std::tuple<
-        sdbusplus::xyz::openbmc_project::Logging::server::Create::FFDCFormat,
-        uint8_t, uint8_t, sdbusplus::message::unix_fd>>
-        pelFFDCInfo;
+    FFDCInfo pelFFDCInfo;
 
     // get SBE ffdc file descriptor
     auto fd = sbeError.getFd();
@@ -204,6 +203,84 @@ uint32_t createSbeErrorPEL(const std::string& event, const sbeError_t& sbeError,
 
     try
     {
+        std::string service =
+            util::getService(bus, loggingObjectPath, opLoggingInterface);
+        auto method =
+            bus.new_method_call(service.c_str(), loggingObjectPath,
+                                opLoggingInterface, "CreatePELWithFFDCFiles");
+        auto level =
+            sdbusplus::xyz::openbmc_project::Logging::server::convertForMessage(
+                severity);
+        method.append(event, level, additionalData, pelFFDCInfo);
+        auto response = bus.call(method);
+
+        // reply will be tuple containing bmc log id, platform log id
+        std::tuple<uint32_t, uint32_t> reply = {0, 0};
+
+        // parse dbus response into reply
+        response.read(reply);
+        plid = std::get<1>(reply); // platform log id is tuple "second"
+    }
+    catch (const sdbusplus::exception_t& e)
+    {
+        log<level::ERR>(
+            std::format("D-Bus call exception",
+                        "OBJPATH={}, INTERFACE={}, EXCEPTION={}",
+                        loggingObjectPath, loggingInterface, e.what())
+                .c_str());
+        throw std::runtime_error(
+            "Error in invoking D-Bus logging create interface");
+    }
+    catch (const std::exception& e)
+    {
+        throw e;
+    }
+    return plid;
+}
+
+inline sdbus::Create::FFDCFormat toFFDCFormat(errl::FFDCFormat format)
+{
+    using FFDCFormat = sdbus::Create::FFDCFormat;
+
+    switch (format)
+    {
+        case errl::FFDCFormat::JSON:
+            return FFDCFormat::JSON;
+        case errl::FFDCFormat::CBOR:
+            return FFDCFormat::CBOR;
+        case errl::FFDCFormat::Text:
+            return FFDCFormat::Text;
+        case errl::FFDCFormat::Custom:
+            return FFDCFormat::Custom;
+        default:
+            throw std::invalid_argument("Invalid UserDataFormat enum value");
+    }
+}
+
+uint32_t createPstSbeErrorPEL(const errl::ErrlEntry* errlEntry)
+{
+    uint32_t plid = 0;
+    auto bus = sdbusplus::bus::new_default();
+
+    const auto& event = errlEntry->getMessage();
+    const auto& ffdcFileOpt = errlEntry->getFfdcFiles();
+
+    const auto& additionalData = errlEntry->getAdditionalData();
+
+    FFDCInfo pelFFDCInfo;
+    if (ffdcFileOpt)
+    {
+        for (const auto& pair : *ffdcFileOpt)
+        {
+            const auto& pelFfdc = pair.first;
+            pelFFDCInfo.emplace_back(
+                std::make_tuple(toFFDCFormat(pelFfdc.format), pelFfdc.subType,
+                                pelFfdc.version, pelFfdc.fd));
+        }
+    }
+    try
+    {
+        const Severity severity = Severity::Error;
         std::string service =
             util::getService(bus, loggingObjectPath, opLoggingInterface);
         auto method =

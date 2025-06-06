@@ -3,6 +3,7 @@
 #include "xyz/openbmc_project/Logging/Entry/server.hpp"
 
 #include <phal_exception.H>
+#include <errl_entry.H>
 
 #include <nlohmann/json.hpp>
 
@@ -50,6 +51,7 @@ uint32_t createSbeErrorPEL(const std::string& event, const sbeError_t& sbeError,
                            struct pdbg_target* procTarget,
                            const Severity severity = Severity::Error);
 
+uint32_t createPstSbeErrorPEL(const errl::ErrlEntry* errlEntry);
 /**
  * @brief Create a PEL for the specified event type and additional data
  *
