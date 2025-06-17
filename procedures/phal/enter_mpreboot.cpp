@@ -143,7 +143,7 @@ void enterMpReboot()
 
     pdbg_set_loglevel(PDBG_NOTICE);
 
-    if(!pdbg_targets_init(NULL))
+    if (!pdbg_targets_init(NULL))
     {
         log<level::ERR>("pdbg target init failed");
         openpower::pel::createPEL("org.open_power.PHAL.Error.MPReboot");
@@ -162,7 +162,8 @@ void enterMpReboot()
         if (!hwasState.functional)
         {
             log<level::INFO>(std::format("proc({}) is not functional",
-                             pdbg_target_index(target)).c_str());
+                                         pdbg_target_index(target))
+                                 .c_str());
             continue;
         }
 
