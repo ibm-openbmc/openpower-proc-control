@@ -72,7 +72,7 @@ void SiblingBMC::read()
     siblingObject->failoversAllowed(cfam.getFailoversAllowed(), createdObject);
     siblingObject->currentBMCState(cfam.getBMCState(), createdObject);
 
-    auto version = std::format("{:X}", cfam.getFWVersion());
+    auto version = std::format("{:08X}", cfam.getFWVersion());
     siblingObject->version(version, createdObject);
 
     // Must detect a heartbeat change to consider it active, so it won't
