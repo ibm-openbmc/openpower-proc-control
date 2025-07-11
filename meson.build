@@ -148,6 +148,22 @@ if build_phal
         'service_files/phal-export-devtree@.service',
         'service_files/phal-create-boottime-guard-indicator.service',
         'service_files/op-clock-data-logger@.service',
+        'istep_services/istep-alignment_check@.service',
+        'istep_services/istep-asset_protection@.service',
+        'istep_services/istep-disableattns@.service',
+        'istep_services/istep-edramrepair@.service',
+        'istep_services/istep-hb_config_update@.service',
+        'istep_services/istep-poweron@.service',
+        'istep_services/istep-proc_attn_listen@.service',
+        'istep_services/istep-proc_clock_test@.service',
+        'istep_services/istep-proc_prep_ipl@.service',
+        'istep_services/istep-proc_select_boot_prom@.service',
+        'istep_services/istep-sbe_config_update@.service',
+        'istep_services/istep-sbe_start@.service',
+        'istep_services/istep-set_ref_clock@.service',
+        'istep_services/istep-startipl@.service',
+        'istep_services/istep-startprd@.service',
+        'istep_services/istep-updatehwmodel@.service',
     ]
     unit_subs.set('ENABLE_PHAL_TRUE', '')
 endif

@@ -1,0 +1,14 @@
+[Unit]
+Description=istep set_ref_clock for host %i
+After=istep-alignment_check@%i.service
+Requires=istep-alignment_check@%i.service
+Conflicts=obmc-host-stop@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep set_ref_clock
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target

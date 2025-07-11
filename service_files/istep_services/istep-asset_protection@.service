@@ -1,0 +1,14 @@
+[Unit]
+Description=istep asset_protection for host %i
+After=istep-edramrepair@%i.service
+Requires=istep-edramrepair@%i.service
+Conflicts=obmc-host-stop@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep asset_protection
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target

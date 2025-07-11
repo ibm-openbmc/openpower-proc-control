@@ -1,0 +1,14 @@
+[Unit]
+Description=istep alignment_check for host %i
+After=istep-updatehwmodel@%i.service
+Requires=istep-updatehwmodel@%i.service
+ConditionPathExists=!/run/openbmc/host@%i-on
+Conflicts=obmc-host-stop@%i.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep alignment_check
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target

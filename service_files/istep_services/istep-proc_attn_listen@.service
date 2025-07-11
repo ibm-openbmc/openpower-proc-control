@@ -1,0 +1,14 @@
+[Unit]
+Description=istep proc_attn_listen for host %i
+After=istep-startprd@%i.service
+Requires=istep-startprd@%i.service
+Conflicts=obmc-host-stop@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep proc_attn_listen
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target

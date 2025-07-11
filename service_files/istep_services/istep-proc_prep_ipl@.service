@@ -1,0 +1,14 @@
+[Unit]
+Description=istep proc_prep_ipl for host %i
+After=istep-proc_clock_test@%i.service
+Requires=istep-proc_clock_test@%i.service
+Conflicts=obmc-host-stop@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep proc_prep_ipl
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target
