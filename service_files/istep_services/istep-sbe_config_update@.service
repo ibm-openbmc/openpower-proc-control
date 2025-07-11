@@ -1,0 +1,14 @@
+[Unit]
+Description=istep sbe_config_update for host %i
+After=istep-hb_config_update@%i.service
+Requires=istep-hb_config_update@%i.service
+Conflicts=obmc-host-stop@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep sbe_config_update
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=istep hb_config_update for host %i
+After=istep-proc_select_boot_prom@%i.service
+Requires=istep-proc_select_boot_prom@%i.service
+Conflicts=obmc-host-stop@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep hb_config_update
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target

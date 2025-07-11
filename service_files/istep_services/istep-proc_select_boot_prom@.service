@@ -1,0 +1,14 @@
+[Unit]
+Description=istep proc_select_boot_prom for host %i
+After=istep-asset_protection@%i.service
+Requires=istep-asset_protection@%i.service
+Conflicts=obmc-host-stop@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep proc_select_boot_prom
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target

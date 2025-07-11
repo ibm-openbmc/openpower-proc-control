@@ -1,0 +1,14 @@
+[Unit]
+Description=istep startipl for host %i
+After=istep-poweron@%i.service
+Requires=istep-poweron@%i.service
+Conflicts=obmc-host-stop@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep startipl
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target

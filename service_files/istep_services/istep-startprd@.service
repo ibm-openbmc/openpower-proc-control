@@ -1,0 +1,14 @@
+[Unit]
+Description=istep startprd for host %i
+After=istep-sbe_start@%i.service
+Requires=istep-sbe_start@%i.service
+Conflicts=obmc-host-stop@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/istep startprd
+RemainAfterExit=yes
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target
