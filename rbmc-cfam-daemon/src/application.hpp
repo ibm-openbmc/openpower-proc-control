@@ -29,6 +29,14 @@ class Application
         ctx.spawn(run());
     }
 
+    /**
+     * @brief Wait for the local CFAM to become accessible
+     */
+    inline void waitForLocalCFAM()
+    {
+        localBMC.waitForCFAM();
+    }
+
   private:
     /**
      * @brief Starts the CFAM-S read loop.

@@ -16,9 +16,9 @@ bool CFAMAccess::exists()
 {
     if (devicePath.empty())
     {
-        findDevicePath();
+        devicePath = findDevicePath();
     }
-    return !devicePath.empty();
+    return !devicePath.empty() && std::filesystem::exists(devicePath);
 }
 
 fs::path CFAMAccess::findDevicePath() const
