@@ -32,6 +32,34 @@ sdbusplus::async::task<> LocalBMC::start()
     co_return;
 }
 
+void LocalBMC::waitForCFAM()
+{
+    constexpr int timeout = 25;
+    int seconds = 0;
+
+    while (!cfam.isReady() && (seconds < timeout))
+    {
+        seconds++;
+        if (seconds == 1)
+        {
+            lg2::info("Waiting for local CFAM to be ready");
+        }
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
+    if (!cfam.isReady())
+    {
+        // TODO: Create an error log calling out this card.
+        lg2::error("Local CFAM is not accessible");
+        throw std::runtime_error("Local CFAM is not accessible");
+    }
+    else if (seconds != 0)
+    {
+        lg2::info("Done waiting for local CFAM to become ready");
+    }
+}
+
 sdbusplus::async::task<> LocalBMC::watchHeartBeat()
 {
     using namespace sdbusplus::bus::match;

@@ -51,6 +51,15 @@ class LocalBMC
      */
     void setSiblingCommsOK(bool ok);
 
+    /**
+     * @brief Waits up to 60 seconds for the local CFAM-S device to show
+     *        up in /dev.
+     *
+     * If it never does, it creates an error log and will throw and
+     * exception to crash the daemon and restart it for a retry.
+     */
+    void waitForCFAM();
+
   private:
     using Role =
         sdbusplus::common::xyz::openbmc_project::state::bmc::Redundancy::Role;
