@@ -128,6 +128,13 @@ class LocalCFAM : public BMCCFAM
     void writeFailoverImminent(bool imminent);
 
     /**
+     * @brief Writes the failover in progress field into the CFAM
+     *
+     * @param[in] inProgress - If a failover is inProgress
+     */
+    void writeFailoverInProgress(bool inProgress);
+
+    /**
      * @brief Increments the heartbeat field in the CFAM
      */
     void incHeartbeat();

@@ -137,6 +137,18 @@ void LocalCFAM::writeFailoverImminent(bool imminent)
     }
 }
 
+void LocalCFAM::writeFailoverInProgress(bool inProgress)
+{
+    auto rc = writeField(Field::failoverInProgress, inProgress);
+    if (rc != 0)
+    {
+        lg2::error(
+            "Failed writing Failover In Progress field {IN_PROGRESS} in local CFAM",
+            "IN_PROGRESS", inProgress);
+        throw std::system_error(rc, std::generic_category());
+    }
+}
+
 std::expected<uint32_t, int> LocalCFAM::readField(Field field)
 {
     auto data = cfamAccess.readScratchReg(cfamFields.at(field).reg);

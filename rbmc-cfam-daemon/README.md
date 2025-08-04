@@ -19,22 +19,23 @@ The `rbmc-cfam-daemon` meson option will enable building this code.
 
 ## CFAM-S ScratchPad Register Layout
 
-| Field             | Register | Start Bit | Length |
-| ----------------- | -------- | --------- | ------ |
-| API Version       | 1        | 0         | 8      |
-| BMC Position      | 1        | 8         | 1      |
-| Role              | 1        | 9         | 2      |
-| Red Enabled       | 1        | 11        | 1      |
-| Failovers Allowed | 1        | 12        | 1      |
-| Provisioned       | 1        | 13        | 1      |
-| BMC State         | 1        | 14        | 3      |
-| Sibling Comms OK  | 1        | 17        | 1      |
-| Failover Imminent | 1        | 18        | 1      |
-| Reserved          | 1        | 19        | 5      |
-| Heartbeat         | 1        | 24        | 8      |
-| FW Version        | 2        | 0         | 32     |
-| Reserved          | 3        | 0         | 32     |
-| Reserved          | 4        | 0         | 32     |
+| Field                | Register | Start Bit | Length |
+| -------------------- | -------- | --------- | ------ |
+| API Version          | 1        | 0         | 8      |
+| BMC Position         | 1        | 8         | 1      |
+| Role                 | 1        | 9         | 2      |
+| Red Enabled          | 1        | 11        | 1      |
+| Failovers Allowed    | 1        | 12        | 1      |
+| Provisioned          | 1        | 13        | 1      |
+| BMC State            | 1        | 14        | 3      |
+| Sibling Comms OK     | 1        | 17        | 1      |
+| Failover Imminent    | 1        | 18        | 1      |
+| Failover In Progress | 1        | 19        | 1      |
+| Reserved             | 1        | 20        | 4      |
+| Heartbeat            | 1        | 24        | 8      |
+| FW Version           | 2        | 0         | 32     |
+| Reserved             | 3        | 0         | 32     |
+| Reserved             | 4        | 0         | 32     |
 
 ### Field Definitions
 
@@ -62,6 +63,8 @@ property from the BMC state daemon.
 **Failover Imminent**: If the sibling will start a failover soon. Only the
 passive BMC will set this, soon before it starts a failover to become active.
 
+**Failover in Progress**: If a failover is in progress.
+
 **Heartbeat**: This field is incremented by one every time the CFAM application
 receives the Heartbeat signal from the RBMC state manager application. This can
 be used by the sibling to know the management daemon is alive.
@@ -85,6 +88,7 @@ Provisioned                true
 BMC State                  xyz.openbmc_project.State.BMC.BMCState.Ready
 Sibling Communication OK   true
 Failover Imminent          false
+Failover In Progress       false
 Heartbeat                  0x25
 FW Version                 0x1c9c4045
 
@@ -98,6 +102,7 @@ Provisioned                true
 BMC State                  xyz.openbmc_project.State.BMC.BMCState.Ready
 Sibling Communication OK   true
 Failover Imminent          false
+Failover In Progress       false
 Heartbeat                  0x24
 FW Version                 0x1c9c4045
 ```

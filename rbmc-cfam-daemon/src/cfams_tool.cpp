@@ -30,6 +30,7 @@ std::string formatValue(BMCCFAM::Field field, uint32_t value)
         case provisioned:
         case siblingCommsOK:
         case failoverImminent:
+        case failoverInProgress:
             result = std::format("{}", value ? "true" : "false");
             break;
         case role:
