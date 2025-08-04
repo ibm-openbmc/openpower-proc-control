@@ -19,12 +19,15 @@ class Services
         sdbusplus::common::xyz::openbmc_project::state::bmc::Redundancy::Role;
     using BMCState =
         sdbusplus::common::xyz::openbmc_project::state::BMC::BMCState;
+    using RedundancyProperties = sdbusplus::common::xyz::openbmc_project::
+        state::bmc::Redundancy::properties_t;
 
     using BMCStateCallback = std::function<void(BMCState)>;
     using RoleCallback = std::function<void(Role)>;
     using RedEnabledCallback = std::function<void(bool)>;
     using FailoversAllowedCallback = std::function<void(bool)>;
     using FailoverImminentCallback = std::function<void(bool)>;
+    using FailoverInProgressCallback = std::function<void(bool)>;
 
     Services() = delete;
     ~Services() = default;
@@ -46,13 +49,16 @@ class Services
      * @param[in] failoversAllowedCallback - Function to run when this prop
      *                                      changes
      * @param[in] failoverImminentCallback - Function to run when this
+     *                                       prop changes
+     * @param[in] failoverInProgressCallback - Function to run when this
      *                                         prop changes
      */
     Services(sdbusplus::async::context& ctx, BMCStateCallback&& stateCallback,
              RoleCallback&& roleCallback,
              RedEnabledCallback&& redEnabledCallback,
              FailoversAllowedCallback&& failoversAllowedCallback,
-             FailoverImminentCallback&& failoverImminentCallback);
+             FailoverImminentCallback&& failoverImminentCallback,
+             FailoverInProgressCallback&& failoverInProgressCallback);
 
     /**
      * @brief Reads the CurrentBMCState property
@@ -62,13 +68,11 @@ class Services
     sdbusplus::async::task<BMCState> getBMCState();
 
     /**
-     * @brief Reads the role and redundancyEnabled properties
+     * @brief Reads all properties from the Redundancy interface
      *
-     * @return - A tuple of role, redundancyEnabled, FailoversAllowed
-     *           FailoverImminent
+     * @return - The properties_t struct of all properties
      */
-    sdbusplus::async::task<std::tuple<Services::Role, bool, bool, bool>>
-        getRedundancyProps();
+    sdbusplus::async::task<RedundancyProperties> getRedundancyProps();
 
     /**
      * @brief Reads the VERSION_ID field out of the version file.
@@ -148,6 +152,11 @@ class Services
      * @brief The callback function for FailoverImminent
      */
     FailoverImminentCallback failoverImminentCallback;
+
+    /**
+     * @brief The callback function for FailoverInProgress
+     */
+    FailoverInProgressCallback failoverInProgressCallback;
 
     /**
      * @brief Object path for this BMC's redundancy and state interfaces.

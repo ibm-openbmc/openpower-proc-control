@@ -23,7 +23,8 @@ sdbusplus::async::task<> LocalBMC::start()
         [this](auto role) { roleChanged(role); },
         [this](auto enabled) { redEnabledChanged(enabled); },
         [this](auto allowed) { failoversAllowedChanged(allowed); },
-        [this](auto imminent) { failoverImminentChanged(imminent); });
+        [this](auto imminent) { failoverImminentChanged(imminent); },
+        [this](auto inProgress) { failoverInProgressChanged(inProgress); });
 
     co_await writeRedundancyProps();
     co_await writeBMCState();
@@ -158,21 +159,30 @@ void LocalBMC::failoverImminentChanged(bool imminent)
     cfam.writeFailoverImminent(imminent);
 }
 
+void LocalBMC::failoverInProgressChanged(bool inProgress)
+{
+    lg2::info("Local Failover In Progress changed to {INPROGRESS}",
+              "INPROGRESS", inProgress);
+    cfam.writeFailoverInProgress(inProgress);
+}
+
 sdbusplus::async::task<> LocalBMC::writeRedundancyProps()
 {
     try
     {
-        auto [role, enabled, allowed,
-              imminent] = co_await services->getRedundancyProps();
-        lg2::info(
-            "Initial values of local role, redEnabled, fo allowed, fo imminent: {ROLE} {ENABLED} {ALLOWED} {IMMINENT}",
-            "ROLE", role, "ENABLED", enabled, "ALLOWED", allowed, "IMMINENT",
-            imminent);
+        auto props = co_await services->getRedundancyProps();
+        lg2::debug(
+            "Initial values of local role, redEnabled, fo allowed, fo imminent, fo in "
+            "progress: {ROLE} {ENABLED} {ALLOWED} {IMMINENT} {IN_PROGRESS}",
+            "ROLE", props.role, "ENABLED", props.redundancy_enabled, "ALLOWED",
+            props.failovers_allowed, "IMMINENT", props.failover_imminent,
+            "IN_PROGRESS", props.failover_in_progress);
 
-        cfam.writeRole(role);
-        cfam.writeRedundancyEnabled(enabled);
-        cfam.writeFailoversAllowed(allowed);
-        cfam.writeFailoverImminent(imminent);
+        cfam.writeRole(props.role);
+        cfam.writeRedundancyEnabled(props.redundancy_enabled);
+        cfam.writeFailoversAllowed(props.failovers_allowed);
+        cfam.writeFailoverImminent(props.failover_imminent);
+        cfam.writeFailoverInProgress(props.failover_in_progress);
     }
     catch (const sdbusplus::exception_t& e)
     {

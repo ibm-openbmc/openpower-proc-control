@@ -42,12 +42,14 @@ Services::Services(
     sdbusplus::async::context& ctx, BMCStateCallback&& stateCallback,
     RoleCallback&& roleCallback, RedEnabledCallback&& redEnabledCallback,
     FailoversAllowedCallback&& failoversAllowedCallback,
-    FailoverImminentCallback&& failoverImminentCallback) :
+    FailoverImminentCallback&& failoverImminentCallback,
+    FailoverInProgressCallback&& failoverInProgressCallback) :
     ctx(ctx), bmcStateCallback(std::move(stateCallback)),
     roleCallback(std::move(roleCallback)),
     redEnabledCallback(std::move(redEnabledCallback)),
     failoversAllowedCallback(std::move(failoversAllowedCallback)),
     failoverImminentCallback(std::move(failoverImminentCallback)),
+    failoverInProgressCallback(std::move(failoverInProgressCallback)),
     localBMCPath(
         sdbusplus::message::object_path{RedNSPath::value} / RedNSPath::bmc)
 {
@@ -148,7 +150,7 @@ sdbusplus::async::task<Services::BMCState> Services::getBMCState()
         .current_bmc_state();
 }
 
-sdbusplus::async::task<std::tuple<Services::Role, bool, bool, bool>>
+sdbusplus::async::task<Services::RedundancyProperties>
     Services::getRedundancyProps()
 {
     auto service = co_await util::getService(ctx, localBMCPath,
@@ -157,13 +159,10 @@ sdbusplus::async::task<std::tuple<Services::Role, bool, bool, bool>>
     using Redundancy =
         sdbusplus::client::xyz::openbmc_project::state::bmc::Redundancy<>;
 
-    auto props = co_await Redundancy(ctx)
-                     .service(service)
-                     .path(localBMCPath)
-                     .properties();
-
-    co_return std::make_tuple(props.role, props.redundancy_enabled,
-                              props.failovers_allowed, props.failover_imminent);
+    co_return co_await Redundancy(ctx)
+        .service(service)
+        .path(localBMCPath)
+        .properties();
 }
 
 sdbusplus::async::task<> Services::watchBMCStateProp()
@@ -223,6 +222,12 @@ sdbusplus::async::task<> Services::watchRedundancyProps()
         {
             failoverImminentCallback(std::get<bool>(it->second));
         }
+
+        it = propertyMap.find("FailoverInProgress");
+        if (it != propertyMap.end())
+        {
+            failoverInProgressCallback(std::get<bool>(it->second));
+        }
     }
 }
 
@@ -281,6 +286,12 @@ sdbusplus::async::task<> Services::watchBMCInterfaceAdded()
             if (propIt != props.end())
             {
                 failoverImminentCallback(std::get<bool>(propIt->second));
+            }
+
+            propIt = props.find("FailoverInProgress");
+            if (propIt != props.end())
+            {
+                failoverInProgressCallback(std::get<bool>(propIt->second));
             }
         }
     }

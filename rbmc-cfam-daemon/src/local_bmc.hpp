@@ -159,6 +159,17 @@ class LocalBMC
     void failoverImminentChanged(bool imminent);
 
     /**
+     * @brief Callback function for when the failover
+     * in progress D-Bus property changes.
+     *
+     * Writes the new value into the CFAM in the
+     * FailoverInProgress field.
+     *
+     * @param[in] inProgress - the value to write
+     */
+    void failoverInProgressChanged(bool inProgress);
+
+    /**
      * @brief The context object
      */
     sdbusplus::async::context& ctx;

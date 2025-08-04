@@ -18,7 +18,7 @@ TEST_F(SiblingCFAMTest, TestReads)
     SiblingCFAM sibling{1, driver};
 
     EXPECT_CALL(driver, read(link1Device, 0))
-        .WillOnce(Return(Expected(0x01DDEFFF)));
+        .WillOnce(Return(Expected(0x01DDFFFF)));
     EXPECT_CALL(driver, read(link1Device, 1))
         .WillOnce(Return(Expected(0x12345678)));
 
@@ -41,6 +41,7 @@ TEST_F(SiblingCFAMTest, TestReads)
     EXPECT_EQ(sibling.getHeartbeat(), 0xFF);
     EXPECT_EQ(sibling.getFWVersion(), 0x12345678);
     EXPECT_EQ(sibling.getFailoverImminent(), true);
+    EXPECT_EQ(sibling.getFailoverInProgress(), true);
 }
 
 TEST_F(SiblingCFAMTest, TestReadFail)
@@ -67,4 +68,5 @@ TEST_F(SiblingCFAMTest, TestReadFail)
     EXPECT_THROW(sibling.getSiblingCommsOK(), std::runtime_error);
     EXPECT_THROW(sibling.getHeartbeat(), std::runtime_error);
     EXPECT_THROW(sibling.getFailoverImminent(), std::runtime_error);
+    EXPECT_THROW(sibling.getFailoverInProgress(), std::runtime_error);
 }
