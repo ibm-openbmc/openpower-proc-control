@@ -48,6 +48,25 @@ void SiblingBMC::read()
         return;
     }
 
+    // Must detect a heartbeat change to consider it alive, so it won't
+    // be alive until at least the second time though.
+    auto heartbeat = cfam.getHeartbeat();
+    auto alive = lastHeartbeat.has_value() &&
+                 (heartbeat != lastHeartbeat.value());
+    lastHeartbeat = heartbeat;
+
+    if (!alive)
+    {
+        if (siblingObject)
+        {
+            lg2::info("Removing sibling object because heartbeat stopped");
+            siblingObject.reset();
+
+            siblingInterface.reset();
+        }
+        return;
+    }
+
     if (!siblingObject)
     {
         lg2::info("Creating Sibling D-Bus interfaces");
@@ -77,14 +96,7 @@ void SiblingBMC::read()
 
     auto version = std::format("{:08X}", cfam.getFWVersion());
     siblingObject->version(version, createdObject);
-
-    // Must detect a heartbeat change to consider it active, so it won't
-    // be active until at least the second time though.
-    auto heartbeat = cfam.getHeartbeat();
-    auto alive = lastHeartbeat.has_value() &&
-                 (heartbeat != lastHeartbeat.value());
     siblingObject->active(alive, createdObject);
-    lastHeartbeat = heartbeat;
 
     if (createdObject)
     {
