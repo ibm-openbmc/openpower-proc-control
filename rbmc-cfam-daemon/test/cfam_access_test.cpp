@@ -13,19 +13,50 @@ class CFAMAccessTest : public CFAMSDevice
 // Test CFAMAccess::readScratchReg()
 TEST_F(CFAMAccessTest, ReadTest)
 {
-    MockDriver driver;
-    std::expected<uint32_t, int> expected = 0x12345678;
+    // Passes
+    {
+        MockDriver driver;
 
-    // First read works, next one fails
-    EXPECT_CALL(driver, read(link0Device, 0)).WillOnce(Return(expected));
-    EXPECT_CALL(driver, read(link0Device, 1))
-        .WillOnce(Return(std::unexpected<int>{2}));
+        EXPECT_CALL(driver, read(link0Device, 0)).WillOnce(Return(0x12345678));
 
-    CFAMAccess cfam{0, driver};
+        CFAMAccess cfam{0, driver};
 
-    EXPECT_EQ(cfam.readScratchReg(cfam::ScratchPadReg::one), 0x12345678);
-    EXPECT_EQ(cfam.readScratchReg(cfam::ScratchPadReg::two),
-              std::unexpected<int>{2});
+        EXPECT_EQ(cfam.readScratchReg(cfam::ScratchPadReg::one), 0x12345678);
+    }
+
+    // 9 fails, then last retry works
+    {
+        MockDriver driver;
+
+        EXPECT_CALL(driver, read(link0Device, 1))
+            .WillOnce(Return(std::unexpected<int>{2}))
+            .WillOnce(Return(std::unexpected<int>{2}))
+            .WillOnce(Return(std::unexpected<int>{2}))
+            .WillOnce(Return(std::unexpected<int>{2}))
+            .WillOnce(Return(std::unexpected<int>{2}))
+            .WillOnce(Return(std::unexpected<int>{2}))
+            .WillOnce(Return(std::unexpected<int>{2}))
+            .WillOnce(Return(std::unexpected<int>{2}))
+            .WillOnce(Return(std::unexpected<int>{2}))
+            .WillOnce(Return(0x12345678));
+
+        CFAMAccess cfam{0, driver};
+
+        EXPECT_EQ(cfam.readScratchReg(cfam::ScratchPadReg::two), 0x12345678);
+    }
+
+    // All retries fail
+    {
+        MockDriver driver;
+
+        EXPECT_CALL(driver, read(link0Device, 1))
+            .WillRepeatedly(Return(std::unexpected<int>{2}));
+
+        CFAMAccess cfam{0, driver};
+
+        EXPECT_EQ(cfam.readScratchReg(cfam::ScratchPadReg::two),
+                  std::unexpected(2));
+    }
 }
 
 // Test CFAMAccess::readScratchRegs
@@ -63,7 +94,7 @@ TEST_F(CFAMAccessTest, ReadScratchRegsTest)
         EXPECT_EQ(results, expectedResults);
     }
 
-    // A read fails
+    // One register fails all retries
     {
         MockDriver driver;
         EXPECT_CALL(driver, read(link0Device, 0))
@@ -71,7 +102,7 @@ TEST_F(CFAMAccessTest, ReadScratchRegsTest)
         EXPECT_CALL(driver, read(link0Device, 1))
             .WillOnce(Return(readValues[1]));
         EXPECT_CALL(driver, read(link0Device, 2))
-            .WillOnce(Return(std::unexpected<int>{2}));
+            .WillRepeatedly(Return(std::unexpected<int>{2}));
 
         CFAMAccess cfam{0, driver};
         auto results = cfam.readScratchRegs(regs);
@@ -82,36 +113,107 @@ TEST_F(CFAMAccessTest, ReadScratchRegsTest)
 // Test CFAMAccess::writeScratchReg()
 TEST_F(CFAMAccessTest, WriteTest)
 {
-    MockDriver driver;
+    // Write works
+    {
+        MockDriver driver;
 
-    // First write works, next one fails
-    EXPECT_CALL(driver, write(link0Device, 0, 0x12345678)).WillOnce(Return(0));
-    EXPECT_CALL(driver, write(link0Device, 1, 0)).WillOnce(Return(-1));
+        // First write works
+        EXPECT_CALL(driver, write(link0Device, 0, 0x12345678))
+            .WillOnce(Return(0));
 
-    CFAMAccess cfam{0, driver};
+        CFAMAccess cfam{0, driver};
 
-    EXPECT_EQ(cfam.writeScratchReg(cfam::ScratchPadReg::one, 0x12345678), 0);
-    EXPECT_EQ(cfam.writeScratchReg(cfam::ScratchPadReg::two, 0), -1);
+        EXPECT_EQ(cfam.writeScratchReg(cfam::ScratchPadReg::one, 0x12345678),
+                  0);
+    }
+
+    // 9 fails, last retry works
+    {
+        MockDriver driver;
+
+        EXPECT_CALL(driver, write(link0Device, 0, 0x12345678))
+            .WillOnce(Return(1))
+            .WillOnce(Return(1))
+            .WillOnce(Return(1))
+            .WillOnce(Return(1))
+            .WillOnce(Return(1))
+            .WillOnce(Return(1))
+            .WillOnce(Return(1))
+            .WillOnce(Return(1))
+            .WillOnce(Return(1))
+            .WillOnce(Return(0));
+
+        CFAMAccess cfam{0, driver};
+
+        EXPECT_EQ(cfam.writeScratchReg(cfam::ScratchPadReg::one, 0x12345678),
+                  0);
+    }
+
+    // All attempts fail
+    {
+        MockDriver driver;
+
+        EXPECT_CALL(driver, write(link0Device, 0, 0x12345678))
+            .WillRepeatedly(Return(1));
+
+        CFAMAccess cfam{0, driver};
+
+        EXPECT_EQ(cfam.writeScratchReg(cfam::ScratchPadReg::one, 0x12345678),
+                  1);
+    }
 }
 
 // Test CFAMAccess::writeScratchRegWithMask()
 TEST_F(CFAMAccessTest, WriteWithMaskTest)
 {
-    MockDriver driver;
+    // Write works
+    {
+        MockDriver driver;
 
-    EXPECT_CALL(driver, writeWithMask(link0Device, 0, 0x00AAAA00, 0x00FFFF00))
-        .WillOnce(Return(0));
+        EXPECT_CALL(driver,
+                    writeWithMask(link0Device, 0, 0x00AAAA00, 0x00FFFF00))
+            .WillOnce(Return(0));
 
-    EXPECT_CALL(driver, writeWithMask(link0Device, 1, 0x00AAAA00, 0x00FFFF00))
-        .WillOnce(Return(-1));
+        CFAMAccess cfam{0, driver};
 
-    CFAMAccess cfam{0, driver};
+        cfam::ModifyOp op{cfam::ScratchPadReg::one, 0x00AAAA00, 0x00FFFF00};
+        EXPECT_EQ(cfam.writeScratchRegWithMask(op), 0);
+    }
 
-    // Good
-    cfam::ModifyOp op{cfam::ScratchPadReg::one, 0x00AAAA00, 0x00FFFF00};
-    EXPECT_EQ(cfam.writeScratchRegWithMask(op), 0);
+    // 9 fails, last retry works
+    {
+        MockDriver driver;
 
-    // Fails
-    op.reg = cfam::ScratchPadReg::two;
-    EXPECT_EQ(cfam.writeScratchRegWithMask(op), -1);
+        EXPECT_CALL(driver,
+                    writeWithMask(link0Device, 0, 0x00AAAA00, 0x00FFFF00))
+            .WillOnce(Return(-1))
+            .WillOnce(Return(-1))
+            .WillOnce(Return(-1))
+            .WillOnce(Return(-1))
+            .WillOnce(Return(-1))
+            .WillOnce(Return(-1))
+            .WillOnce(Return(-1))
+            .WillOnce(Return(-1))
+            .WillOnce(Return(-1))
+            .WillOnce(Return(0));
+
+        CFAMAccess cfam{0, driver};
+
+        cfam::ModifyOp op{cfam::ScratchPadReg::one, 0x00AAAA00, 0x00FFFF00};
+        EXPECT_EQ(cfam.writeScratchRegWithMask(op), 0);
+    }
+
+    // All attempts fail
+    {
+        MockDriver driver;
+
+        EXPECT_CALL(driver,
+                    writeWithMask(link0Device, 0, 0x00AAAA00, 0x00FFFF00))
+            .WillRepeatedly(Return(-1));
+
+        CFAMAccess cfam{0, driver};
+
+        cfam::ModifyOp op{cfam::ScratchPadReg::one, 0x00AAAA00, 0x00FFFF00};
+        EXPECT_EQ(cfam.writeScratchRegWithMask(op), -1);
+    }
 }
