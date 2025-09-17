@@ -20,7 +20,7 @@ sdbusplus::async::task<> Application::run()
 
         if (siblingBMC)
         {
-            siblingBMC->read();
+            co_await siblingBMC->read();
             localBMC.setSiblingCommsOK(siblingBMC->ok());
         }
 
