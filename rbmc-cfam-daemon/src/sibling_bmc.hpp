@@ -53,7 +53,7 @@ class SiblingBMC
      * 3) If there are errors, remove the interface from D-Bus so nobody
      *    can read stale values.
      */
-    void read();
+    sdbusplus::async::task<> read();
 
     /**
      * @brief Says if it could successfully read the CFAM.
@@ -66,6 +66,15 @@ class SiblingBMC
     }
 
   private:
+    /**
+     * @brief Checks if CFAM is ready to access.
+     *
+     * Will retry a few times if it isn't.
+     *
+     * @return bool - If ready or not
+     */
+    sdbusplus::async::task<bool> checkCFAMReady();
+
     /**
      * @brief The context object
      */

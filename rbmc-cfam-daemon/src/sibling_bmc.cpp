@@ -3,13 +3,47 @@
 
 #include <phosphor-logging/lg2.hpp>
 
+#include <chrono>
 #include <format>
 
-void SiblingBMC::read()
+sdbusplus::async::task<bool> SiblingBMC::checkCFAMReady()
+{
+    constexpr size_t maxAttempts = 10;
+    size_t attempts = 0;
+
+    while (attempts < maxAttempts)
+    {
+        if (cfam.isReady())
+        {
+            co_return true;
+        }
+
+        attempts++;
+        if (attempts < maxAttempts)
+        {
+            if (ready)
+            {
+                lg2::warning("Sibling BMC CFAM not ready. Retrying");
+            }
+            co_await sdbusplus::async::sleep_for(ctx,
+                                                 std::chrono::milliseconds(50));
+        }
+        else
+        {
+            if (ready)
+            {
+                lg2::error("Giving up");
+            }
+        }
+    }
+    co_return false;
+}
+
+sdbusplus::async::task<> SiblingBMC::read()
 {
     bool createdObject = false;
 
-    if (!cfam.isReady())
+    if (!co_await checkCFAMReady())
     {
         if (ready)
         {
@@ -25,7 +59,7 @@ void SiblingBMC::read()
 
             siblingInterface.reset();
         }
-        return;
+        co_return;
     }
 
     if (!ready)
@@ -45,7 +79,7 @@ void SiblingBMC::read()
 
             siblingInterface.reset();
         }
-        return;
+        co_return;
     }
 
     // Must detect a heartbeat change to consider it alive, so it won't
@@ -64,7 +98,7 @@ void SiblingBMC::read()
 
             siblingInterface.reset();
         }
-        return;
+        co_return;
     }
 
     if (!siblingObject)
