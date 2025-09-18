@@ -24,7 +24,10 @@ class Application
      * @param fs - The Driver object
      */
     Application(sdbusplus::async::context& ctx, std::unique_ptr<Driver> d) :
-        ctx(ctx), driver(std::move(d)), localBMC(ctx, *driver.get())
+        ctx(ctx), driver(std::move(d)), localBMC(ctx, *driver.get()),
+        availInterface(
+            ctx.get_bus(), SiblingBMC::getObjectPath().c_str(),
+            {{"Available", AvailInterface::PropertiesVariant{false}}}, true)
     {
         ctx.spawn(run());
     }
@@ -64,4 +67,12 @@ class Application
      * Only created if sibling is present.
      */
     std::unique_ptr<SiblingBMC> siblingBMC;
+
+    /**
+     * @brief D-Bus The Availability D-Bus interface
+     *
+     * Holds the Available property that indicates if the sibling
+     * BMC's CFAM FSI device is present.
+     */
+    AvailInterface availInterface;
 };

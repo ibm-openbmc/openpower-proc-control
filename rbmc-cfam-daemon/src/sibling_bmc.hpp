@@ -5,10 +5,14 @@
 
 #include <sdbusplus/async.hpp>
 #include <xyz/openbmc_project/State/BMC/Redundancy/Sibling/server.hpp>
+#include <xyz/openbmc_project/State/Decorator/Availability/server.hpp>
 
 using SiblingIntf =
     sdbusplus::xyz::openbmc_project::State::BMC::Redundancy::server::Sibling;
 using SiblingInterface = sdbusplus::server::object_t<SiblingIntf>;
+
+using AvailInterface =
+    sdbusplus::server::xyz::openbmc_project::state::decorator::Availability;
 
 /**
  * @class SiblingBMC
@@ -37,9 +41,11 @@ class SiblingBMC
      * @param[in] ctx - The async context object
      * @param[in] link - The FSI link for the CFAM
      * @param[in] driver - The driver object
+     * @param[in] availIface - Availability D-Bus iface obj
      */
-    SiblingBMC(sdbusplus::async::context& ctx, size_t link, Driver& driver) :
-        ctx(ctx), cfam(link, driver)
+    SiblingBMC(sdbusplus::async::context& ctx, size_t link, Driver& driver,
+               AvailInterface& availIface) :
+        ctx(ctx), availInterface(availIface), cfam(link, driver)
     {}
 
     /**
@@ -63,6 +69,15 @@ class SiblingBMC
     bool ok()
     {
         return cfam.isReady() && !cfam.hasError();
+    }
+
+    /**
+     * @brief Returns the D-Bus object path for the sibling BMC.
+     */
+    static std::string getObjectPath()
+    {
+        return std::string{RedIntf::namespace_path::value} + '/' +
+               RedIntf::namespace_path::sibling_bmc;
     }
 
   private:
@@ -89,6 +104,14 @@ class SiblingBMC
      * @brief The Sibling D-Bus object
      */
     std::unique_ptr<SiblingObject> siblingObject;
+
+    /**
+     * @brief D-Bus The Availability D-Bus interface
+     *
+     * Holds the Available property that indicates if the sibling
+     * BMC's CFAM FSI device is present.
+     */
+    AvailInterface& availInterface;
 
     /**
      * @brief The last heartbeat value read from the CFAM.

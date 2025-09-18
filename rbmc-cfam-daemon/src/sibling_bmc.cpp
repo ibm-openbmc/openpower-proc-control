@@ -59,8 +59,13 @@ sdbusplus::async::task<> SiblingBMC::read()
 
             siblingInterface.reset();
         }
+
+        availInterface.available(false);
+
         co_return;
     }
+
+    availInterface.available(true);
 
     if (!ready)
     {
@@ -105,15 +110,11 @@ sdbusplus::async::task<> SiblingBMC::read()
     {
         lg2::info("Creating Sibling D-Bus interfaces");
 
-        auto objectPath =
-            sdbusplus::message::object_path{RedIntf::namespace_path::value} /
-            RedIntf::namespace_path::sibling_bmc;
-
-        siblingObject =
-            std::make_unique<SiblingObject>(ctx.get_bus(), objectPath.str);
+        siblingObject = std::make_unique<SiblingObject>(
+            ctx.get_bus(), getObjectPath().c_str());
 
         siblingInterface = std::make_unique<SiblingInterface>(
-            ctx.get_bus(), objectPath.str.c_str(),
+            ctx.get_bus(), getObjectPath().c_str(),
             SiblingInterface::action::defer_emit);
 
         createdObject = true;
