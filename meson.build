@@ -136,6 +136,10 @@ if build_phal
         cxx.find_library('ipl'),
         cxx.find_library('phal'),
         cxx.find_library('dtree'),
+        cxx.find_library('targeting'),
+        cxx.find_library('targetsvc'),
+        cxx.find_library('hwaccess'),
+        cxx.find_library('transport'),
     ]
     extra_unit_files = [
         'service_files/set-spi-mux.service',
