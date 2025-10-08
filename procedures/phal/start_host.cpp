@@ -268,7 +268,9 @@ void startHost(enum ipl_type iplType = IPL_TYPE_NORMAL)
 {
     try
     {
-        phal_init();
+        //TODO p12-refactor need to use env variable here for dtb
+        TargetService::instance().init("/tmp/targeting_test.dtb");
+
         ipl_set_type(iplType);
 
         /**
