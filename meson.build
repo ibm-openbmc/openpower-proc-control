@@ -12,6 +12,9 @@ project(
     version: '1.0',
     meson_version: '>=1.1.1',
 )
+
+#do not fail on the ABI warning in <format> from stdplus/fmt
+add_project_arguments('-Wno-error=format-security', language: 'cpp')
 add_project_arguments('-Wno-psabi', language: 'cpp')
 
 if get_option('cpp_std') != 'c++23'
@@ -225,7 +228,6 @@ executable(
         phosphor_logging_dep,
         sdbusplus_dep,
         dependency('threads'),
-        dependency('fmt'),
     ] + extra_dependencies,
     install: true,
 )
