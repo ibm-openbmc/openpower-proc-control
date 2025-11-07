@@ -144,7 +144,7 @@ void requestDump(const DumpParameters& dumpParameters)
     }
     catch (const sdbusplus::exception_t& e)
     {
-        log<level::ERR>(std::format("D-Bus call createDump exception",
+        log<level::ERR>(std::format("D-Bus call createDump exception"
                                     "OBJPATH={}, INTERFACE={}, EXCEPTION={}",
                                     path, interface, e.what())
                             .c_str());

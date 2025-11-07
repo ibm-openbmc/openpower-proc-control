@@ -120,7 +120,7 @@ void createErrorPEL(const std::string& event, const json& calloutData,
     catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>(
-            std::format("D-Bus call exception",
+            std::format("D-Bus call exception"
                         "OBJPATH={}, INTERFACE={}, event={}, EXCEPTION={}",
                         loggingObjectPath, loggingInterface, event, e.what())
                 .c_str());
@@ -224,7 +224,7 @@ uint32_t createSbeErrorPEL(const std::string& event, const sbeError_t& sbeError,
     catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>(
-            std::format("D-Bus call exception",
+            std::format("D-Bus call exception"
                         "OBJPATH={}, INTERFACE={}, EXCEPTION={}",
                         loggingObjectPath, loggingInterface, e.what())
                 .c_str());
@@ -302,7 +302,7 @@ uint32_t createPstSbeErrorPEL(const errl::ErrlEntry* errlEntry)
     catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>(
-            std::format("D-Bus call exception",
+            std::format("D-Bus call exception"
                         "OBJPATH={}, INTERFACE={}, EXCEPTION={}",
                         loggingObjectPath, loggingInterface, e.what())
                 .c_str());
@@ -343,7 +343,7 @@ void createPEL(const std::string& event, const FFDCData& ffdcData,
     catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>(
-            std::format("sdbusplus D-Bus call exception",
+            std::format("sdbusplus D-Bus call exception"
                         "OBJPATH={}, INTERFACE={}, EXCEPTION={}",
                         loggingObjectPath, loggingInterface, e.what())
                 .c_str());

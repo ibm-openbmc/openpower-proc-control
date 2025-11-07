@@ -1,8 +1,3 @@
-extern "C"
-{
-#include <libpdbg.h>
-}
-
 #include "attributes_info.H"
 
 #include "extensions/phal/common_utils.hpp"
@@ -11,6 +6,12 @@ extern "C"
 #include "util.hpp"
 
 #include <libekb.H>
+#include <targeting/predicates/predicateattrval.H>
+#include <targeting/predicates/predicatepostfixexpr.H>
+#include <targeting/target.H>
+#include <targeting/target_service.H>
+#include <targeting/xmltohb/attributeenums.H>
+#include <targeting/xmltohb/attributetraits.H>
 
 #include <ext_interface.hpp>
 #include <nlohmann/json.hpp>
@@ -25,7 +26,7 @@ namespace phal
 {
 
 using namespace phosphor::logging;
-
+using namespace TARGETING;
 /**
  *  @brief  Select BOOT SEEPROM and Measurement SEEPROM(PRIMARY/BACKUP) on POWER
  *          processor position 0/1 depending on boot count before kicking off
@@ -35,17 +36,19 @@ using namespace phosphor::logging;
  */
 void selectBootSeeprom()
 {
-    struct pdbg_target* procTarget;
     ATTR_BACKUP_SEEPROM_SELECT_Enum bkpSeePromSelect;
     ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT_Enum bkpMeaSeePromSelect;
 
-    pdbg_for_each_class_target("proc", procTarget)
+    PredicatePostfixExpr pred;
+    pred.push(std::make_shared<PredicateAttrVal<ATTR_TYPE>>(TYPE_PROC))
+        .push(std::make_shared<PredicateAttrVal<ATTR_PROC_MASTER_TYPE>>(
+            ENUM_ATTR_PROC_MASTER_TYPE_ACTING_MASTER))
+        .And();
+    auto top = TargetService::instance().getTopLevelTarget();
+    for (auto&& tgt : TargetService::instance().getAssociated(
+             top, AssociationType::childByPhysical, RecursionLevel::immediate,
+             &pred))
     {
-        if (!isPrimaryProc(procTarget))
-        {
-            continue;
-        }
-
         // Choose seeprom side to boot from based on boot count
         if (getBootCount() > 0)
         {
@@ -67,27 +70,9 @@ void selectBootSeeprom()
                 ENUM_ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT_SECONDARY;
         }
 
-        // Set the Attribute as per bootcount policy for boot seeprom
-        if (DT_SET_PROP(ATTR_BACKUP_SEEPROM_SELECT, procTarget,
-                        bkpSeePromSelect))
-        {
-            log<level::ERR>(
-                "Attribute [ATTR_BACKUP_SEEPROM_SELECT] set failed");
-            throw std::runtime_error(
-                "Attribute [ATTR_BACKUP_SEEPROM_SELECT] set failed");
-        }
-
-        // Set the Attribute as per bootcount policy for measurement seeprom
-        if (DT_SET_PROP(ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT, procTarget,
-                        bkpMeaSeePromSelect))
-        {
-            log<level::ERR>(
-                "Attribute [ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT] set "
-                "failed");
-            throw std::runtime_error(
-                "Attribute [ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT] set "
-                "failed");
-        }
+        tgt->setAttr<ATTR_BACKUP_SEEPROM_SELECT>(bkpSeePromSelect);
+        tgt->setAttr<ATTR_BACKUP_MEASUREMENT_SEEPROM_SELECT>(
+            bkpMeaSeePromSelect);
     }
 }
 
@@ -154,18 +139,13 @@ void setClkNETerminationSite()
         clockTerm = ENUM_ATTR_SYS_CLK_NE_TERMINATION_SITE_PROC;
     }
 
-    // update all the processor attributes
-    struct pdbg_target* procTarget;
-    pdbg_for_each_class_target("proc", procTarget)
+    PredicateAttrVal<ATTR_TYPE> pred(TYPE_PROC);
+    auto top = TargetService::instance().getTopLevelTarget();
+    for (auto&& target : TargetService::instance().getAssociated(
+             top, AssociationType::childByPhysical, RecursionLevel::immediate,
+             &pred))
     {
-        if (DT_SET_PROP(ATTR_SYS_CLK_NE_TERMINATION_SITE, procTarget,
-                        clockTerm))
-        {
-            log<level::ERR>(
-                "Attribute ATTR_SYS_CLK_NE_TERMINATION_SITE set failed");
-            throw std::runtime_error(
-                "Attribute ATTR_SYS_CLK_NE_TERMINATION_SITE set failed");
-        }
+        target->setAttr<ATTR_SYS_CLK_NE_TERMINATION_SITE>(clockTerm);
     }
 }
 
@@ -288,7 +268,9 @@ void startHost(enum ipl_type iplType = IPL_TYPE_NORMAL)
 {
     try
     {
-        phal_init();
+        //TODO p12-refactor need to use env variable here for dtb
+        TargetService::instance().init("/tmp/targeting_test.dtb");
+
         ipl_set_type(iplType);
 
         /**
