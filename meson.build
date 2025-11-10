@@ -286,6 +286,8 @@ if build_phal
     )
 endif
 
+subdir('ecmd_plugin')
+
 unit_files = [
     'service_files/pcie-poweroff@.service',
     'service_files/xyz.openbmc_project.Control.Host.NMI.service',
