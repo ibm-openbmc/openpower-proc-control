@@ -301,3 +301,6 @@ if not get_option('tests').disabled()
         ),
     )
 endif
+if get_option('ecmd-plugin').enabled()
+  subdir('ecmd-plugin')
+endif
