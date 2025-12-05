@@ -5,6 +5,7 @@
 #include "extensions/phal/phal_error.hpp"
 #include "util.hpp"
 
+#include <errl_factory.H>
 #include <libekb.H>
 #include <targeting/predicates/predicateattrval.H>
 #include <targeting/predicates/predicatepostfixexpr.H>
@@ -16,6 +17,7 @@
 #include <ext_interface.hpp>
 #include <nlohmann/json.hpp>
 #include <phosphor-logging/log.hpp>
+#include <phosphor-logging/lg2.hpp>
 #include <registration.hpp>
 
 #include <format>
@@ -268,7 +270,7 @@ void startHost(enum ipl_type iplType = IPL_TYPE_NORMAL)
 {
     try
     {
-        //TODO p12-refactor need to use env variable here for dtb
+        // TODO p12-refactor need to use env variable here for dtb
         TargetService::instance().init("/tmp/targeting_test.dtb");
 
         ipl_set_type(iplType);
@@ -307,6 +309,19 @@ void startHost(enum ipl_type iplType = IPL_TYPE_NORMAL)
     if (rc > 0)
     {
         log<level::ERR>("step 0 failed to start the host");
+        auto errlHandle = errl::factory::createSbeHWPFailure();
+        if (errlHandle && *errlHandle)
+        {
+            const auto& entries = (*errlHandle)->getEntries();
+            for (const auto& entryPtr : entries)
+            {
+                if (entryPtr)
+                {
+		    lg2::error("invoking createPstSbeErrorPEL");
+                    openpower::pel::createPstSbeErrorPEL(entryPtr.get());
+                }
+            }
+        }
         throw std::runtime_error("Failed to execute host start boot step");
     }
 }
