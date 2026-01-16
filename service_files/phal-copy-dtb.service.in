@@ -1,0 +1,11 @@
+[Unit]
+Description= Temporary service to copy dtb
+After=org.open_power.HardwareIsolation.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/bin/bash -c 'cp /usr/share/pdata/Rainier-2U.dtb $(readlink -f /var/lib/phosphor-software-manager/hostfw/running/DEVTREE)'
+
+[Install]
+WantedBy=multi-user.target
