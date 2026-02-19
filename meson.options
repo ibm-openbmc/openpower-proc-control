@@ -1,8 +1,13 @@
 option('tests', type: 'feature', description: 'Build tests.')
-option('p9', type: 'feature', description: 'Enable support for POWER9')
 option('openfsi', type: 'feature', description: 'Enable support for OpenFSI')
-option('phal', type: 'feature', description: 'Enable support for PHAL')
 
+option(
+    'phal_backend',
+    type: 'combo',
+    choices: ['legacy', 'next', 'none'],
+    value: 'none',
+    description: 'Select PHAL backend',
+)
 option(
     'DEVTREE_EXPORT_FILTER_FILE',
     type: 'string',

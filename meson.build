@@ -24,6 +24,12 @@ endif
 
 cxx = meson.get_compiler('cpp')
 
+phal_backend = get_option('phal_backend')
+
+if phal_backend == 'legacy'
+    add_project_arguments('-DLEGACY_PHAL', language: 'cpp')
+endif
+
 extra_sources = []
 extra_dependencies = []
 extra_unit_files = []
@@ -83,23 +89,13 @@ unit_subs.set(
     description: 'Path to the devtree file r/w version',
 )
 
-if get_option('phal').enabled() and get_option('p9').enabled()
-    error('phal and p9 cannot be selected at the same time')
-endif
 
-build_p9 = not get_option('p9').disabled()
 build_openfsi = not get_option('openfsi').disabled()
-build_phal = get_option('phal').enabled()
 
-if get_option('phal').enabled() and not get_option('p9').disabled()
-    build_p9 = false
-endif
+summary('Building phal_backend:', phal_backend)
 
-summary('building p9', build_p9)
-summary('building openfsi', build_openfsi)
-summary('building phal', build_phal)
-
-if build_p9
+#default is P9
+if phal_backend == 'none'
     extra_sources += [
         'procedures/p9/cleanup_pcie.cpp',
         'procedures/p9/set_sync_fsi_clock_mode.cpp',
@@ -112,7 +108,7 @@ endif
 if build_openfsi
     extra_sources += ['procedures/openfsi/scan.cpp']
 endif
-if build_phal
+if phal_backend == 'legacy'
     extra_sources += [
         'procedures/phal/start_host.cpp',
         'procedures/phal/set_SPI_mux.cpp',
@@ -230,7 +226,7 @@ executable(
     install: true,
 )
 
-if build_phal
+if phal_backend == 'legacy'
     executable(
         'phal-export-devtree',
         [
