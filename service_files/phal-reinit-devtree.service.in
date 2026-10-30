@@ -4,6 +4,7 @@ Before=start_host@0.service
 After=openpower-update-bios-attr-table.service
 ConditionPathExists=!/var/lib/phal/genesisboot
 ConditionPathExists=!/run/openbmc/mpreboot@0
+ConditionPathExists=!/run/openbmc/host@0-on
 
 [Service]
 Type=oneshot
